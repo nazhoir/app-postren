@@ -15,8 +15,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import Link from "next/link";
 
 export default function Page() {

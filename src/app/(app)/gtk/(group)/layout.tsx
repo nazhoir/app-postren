@@ -1,6 +1,5 @@
 "use client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { useSelectedLayoutSegment } from "next/navigation";
 import Link from "next/link";
 
@@ -8,10 +7,8 @@ import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -50,6 +47,12 @@ export default function LayoutLayout({
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+          <Button className="ml-auto mr-4" asChild>
+            <Link href={"/gtk/add"}>
+              <Plus className="h-4 w-4" />
+              <span className="ml-1">Tambah</span>
+            </Link>
+          </Button>
         </header>
         <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]">
           <Tabs value={params!} className="w-full">

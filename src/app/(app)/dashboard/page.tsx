@@ -1,59 +1,14 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import Link from "next/link";
 
-export default function Page() {
-  const data = [
-    {
-      id: "ansdkasdnkaj-nasdakls-klwjlwk",
-      type: "Pondok Pesantren",
-      name: "Nurul Jadid Sejati",
-      shortname: "ppnjs",
-      statistc: "13534423234",
-      statistcType: "NSPP",
-    },
-    {
-      id: "ansdkasdnkaj-nasdakls-kfwjlwk",
-      type: "Madrasah Aliyah",
-      name: "Nurul Jadid Sejati",
-      shortname: "manjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-    {
-      id: "ansdkasdqkaj-nasdakls-kfwjlwk",
-      type: "Madrasah Diniyah Takmiliyah Awaliyah",
-      name: "Nurul Jadid Sejati",
-      shortname: "mdtanjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-    {
-      id: "ansdkasdqkaj-nasdakls-kfwjllk",
-      type: "Madrasah Diniyah Takmiliyah Wustha",
-      name: "Nurul Jadid Sejati",
-      shortname: "mdtwnjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-  ];
+export default async function Page() {
   return (
     <div className="h-fit overflow-auto">
       <header className="flex h-16 shrink-0 items-center gap-2">
@@ -63,28 +18,13 @@ export default function Page() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>Peserta Didik</BreadcrumbPage>
+                <BreadcrumbPage>Dashboard</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
-      <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]">
-        <div className="grid gap-4 md:grid-cols-2">
-          {data.map((institution) => (
-            <Card key={institution.id}>
-              <CardHeader>
-                <CardTitle>
-                  {institution.type} {institution.name}
-                </CardTitle>
-                <CardDescription>
-                  {institution.statistcType}: {institution.statistc}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </main>
+      <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]"></main>
     </div>
   );
 }

@@ -2,25 +2,23 @@
 
 import * as React from "react";
 import {
-  BookOpen,
-  Bot,
   Command,
-  Frame,
   LifeBuoy,
-  Map,
-  PieChart,
   Send,
   Settings2,
-  SquareTerminal,
   LayoutDashboard,
   School2,
   Users2,
   GraduationCap,
-  CreditCard,
+  BriefcaseBusiness,
+  Banknote,
+  IdCard,
+  Landmark,
+  ShieldEllipsis,
+  Building2,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -52,6 +50,37 @@ const data = {
       icon: School2,
     },
     {
+      title: "Sarana Prasarana",
+      url: "/assets",
+      icon: Building2,
+      items: [
+        {
+          title: "Aset Tetap",
+          url: "/fixed-assets",
+        },
+        {
+          title: "Aset Lancar",
+          url: "/current-assets",
+        },
+        {
+          title: "Perpustakaan",
+          url: "/library",
+        },
+        {
+          title: "Asrama",
+          url: "/hostel",
+        },
+      ],
+    },
+  ],
+
+  member: [
+    {
+      title: "Anggota",
+      url: "/users",
+      icon: Users2,
+    },
+    {
       title: "Peserta didik",
       url: "/students",
       icon: GraduationCap,
@@ -77,7 +106,7 @@ const data = {
     {
       title: "Guru dan Tendik",
       url: "/gtk",
-      icon: Users2,
+      icon: BriefcaseBusiness,
       items: [
         {
           title: "Tambah",
@@ -93,11 +122,12 @@ const data = {
         },
       ],
     },
-
+  ],
+  feature: [
     {
       title: "Keuangan",
       url: "/finance",
-      icon: CreditCard,
+      icon: Banknote,
       items: [
         {
           title: "Pembayaran",
@@ -113,6 +143,23 @@ const data = {
         },
       ],
     },
+    {
+      title: "Tabungan",
+      url: "/savings",
+      icon: Landmark,
+    },
+    {
+      title: "Perizinan",
+      url: "/permission",
+      icon: ShieldEllipsis,
+    },
+    {
+      title: "Absensi",
+      url: "/attendances",
+      icon: IdCard,
+    },
+  ],
+  other: [
     {
       title: "Settings",
       url: "#",
@@ -136,8 +183,6 @@ const data = {
         },
       ],
     },
-  ],
-  navSecondary: [
     {
       title: "Support",
       url: "#",
@@ -149,26 +194,17 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebar extends React.ComponentProps<typeof Sidebar> {
+  user: {
+    name: string;
+    email: string;
+    image: string;
+  };
+}
+
+export function AppSidebar({ user, ...props }: AppSidebar) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -190,11 +226,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavSecondary label="Keanggotaan" items={data.member} />
+        <NavSecondary label="Fitur" items={data.feature} />
+        <NavSecondary label="Lainnya" items={data.other} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

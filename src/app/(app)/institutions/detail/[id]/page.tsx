@@ -9,12 +9,25 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { auth } from "@/server/auth";
+import { getInstitutionDetailByID } from "@/server/actions/institutions";
 import Link from "next/link";
-import { CreateStudentForm } from "./create-student-form";
+import { notFound } from "next/navigation";
 
-export default function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const session = await auth();
+
+  if (!session) return null;
+
+  const data = await getInstitutionDetailByID(session.user.id, id);
+
+  if (!data) notFound();
   return (
     <div className="h-fit overflow-auto">
       <header className="flex h-16 shrink-0 items-center gap-2">
@@ -25,23 +38,21 @@ export default function Page() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/students">Peserta Didik</Link>
+                  <Link href="/institutions">Lembaga</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Tambah</BreadcrumbPage>
+                <BreadcrumbPage className="capitalize">
+                  {data.type} {data.name.toLowerCase()}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <Button className="ml-auto mr-4">
-          <Plus className="h-4 w-4" />
-          <span className="ml-1 hidden md:block">Tambah Masal</span>
-        </Button>
       </header>
       <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]">
-        <CreateStudentForm />
+        <div className="grid gap-4 md:grid-cols-2">{data.name}</div>
       </main>
     </div>
   );

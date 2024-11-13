@@ -8,10 +8,8 @@ import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -68,7 +66,7 @@ export default function Page() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <Button className="ml-auto" asChild>
+        <Button className="ml-auto mr-4" asChild>
           <Link href={"/students/add"}>
             <Plus className="h-4 w-4" />
             <span className="ml-1">Tambah</span>
