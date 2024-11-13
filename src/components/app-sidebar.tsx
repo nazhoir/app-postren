@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  Command,
   LifeBuoy,
   Send,
   Settings2,
@@ -213,8 +212,7 @@ export function AppSidebar({ user, ...props }: AppSidebar) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  {/* <Command className="size-4" /> */}
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-700 text-sidebar-primary-foreground">
                 <Icons.logo/>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
