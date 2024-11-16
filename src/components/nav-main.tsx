@@ -72,7 +72,9 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      {label ?? <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+      <SidebarGroupLabel className={label ?? "hidden"}>
+        {label}
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const isActive = isItemActive(item);

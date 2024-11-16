@@ -12,7 +12,8 @@ import { Plus } from "lucide-react";
 import AddStudentForm from "./add-student-form";
 
 // If you need to add additional props specific to the dialog:
-interface AddStudentDialogProps extends React.ComponentProps<typeof AddStudentForm> {
+interface AddStudentDialogProps
+  extends React.ComponentProps<typeof AddStudentForm> {
   // Add any additional props specific to the dialog here
   dialogTitle?: string;
   dialogDescription?: string;
@@ -36,7 +37,7 @@ export default function AddStudentDialog({
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
-        <AddStudentForm  {...formProps} />
+        <AddStudentForm {...formProps} />
       </DialogContent>
     </Dialog>
   );
