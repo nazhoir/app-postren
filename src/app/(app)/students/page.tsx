@@ -33,8 +33,6 @@ export default async function Page() {
 
   if (!data) return null;
 
-  console.log(data);
-
   return (
     <div className="h-fit overflow-auto">
       <header className="flex h-16 shrink-0 items-center gap-2">

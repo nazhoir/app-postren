@@ -13,12 +13,12 @@ import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { getOrgsMemberByOrgID } from "@/server/actions/members";
 import { Button } from "@/components/ui/button";
-import { Check, Plus, RefreshCw, Search } from "lucide-react";
+import { Plus, RefreshCw, Search } from "lucide-react";
 import { getOrgsIdByUserId } from "@/server/actions/organizations";
 import { Input } from "@/components/ui/input";
-import MoreAction from "./more-action";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
+import Link from "next/link";
 
 export default async function Page() {
   const sesssion = await auth();
@@ -50,14 +50,11 @@ export default async function Page() {
             </Button>
           </div>
           <CreateMember userId={sesssion.user.id} />
-          <Button
-            size={"sm"}
-            variant={"outline"}
-            className="hidden md:flex"
-            disabled
-          >
-            <Plus className="h-4 w-4" />
-            <span className="ml-1">Tambah Masal</span>
+          <Button size={"sm"} variant={"outline"} asChild>
+            <Link href={"/members/create-bulk"}>
+              <Plus className="h-4 w-4" />
+              <span className="ml-1">Tambah Masal</span>
+            </Link>
           </Button>
           <Button
             size={"sm"}

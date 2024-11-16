@@ -25,7 +25,6 @@ export const AddOrganizationStudent = async (
 
   const data = validatedFields.data;
   try {
-    console.log(data);
     const getOrgId = await db.query.usersToOrganizations.findFirst({
       where: eq(usersToOrganizations.userId, data.createdBy),
     });

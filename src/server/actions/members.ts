@@ -14,20 +14,22 @@ import { eq } from "drizzle-orm";
 export const createMemberAction = async (
   values: z.infer<typeof CreateMemberSchema>,
 ) => {
+  // Validasi input menggunakan schema
   const validatedFields = CreateMemberSchema.safeParse(values);
-
   if (!validatedFields.success) {
-    return { error: "Invalid fields!" };
+    return { error: "Invalid fields", details: validatedFields.error };
   }
 
   const data = validatedFields.data;
+
   try {
+    // Ambil organisasi berdasarkan `createdBy`
     const getOrgId = await db.query.usersToOrganizations.findFirst({
       where: eq(usersToOrganizations.userId, data.createdBy),
     });
 
     if (!getOrgId) {
-      throw new Error("Organization not found");
+      return { error: "Organization not found" };
     }
 
     const {
@@ -43,7 +45,9 @@ export const createMemberAction = async (
       nisn,
     } = data;
 
+    // Lakukan transaksi database
     await db.transaction(async (tx) => {
+      // Tambah data pengguna ke tabel `users`
       const [createUser] = await tx
         .insert(users)
         .values({
@@ -55,14 +59,17 @@ export const createMemberAction = async (
           gender,
         })
         .returning({ id: users.id });
-      if (!createUser) throw new Error("failed");
-      // Create user-organization relationship
+
+      if (!createUser) throw new Error("Failed to create user");
+
+      // Tambah relasi pengguna-organisasi ke tabel `usersToOrganizations`
       await tx.insert(usersToOrganizations).values({
         userId: createUser.id,
         organizationId: getOrgId.organizationId,
         createdBy,
       });
 
+      // Jika role adalah siswa, tambahkan data ke tabel `students`
       if (role === "student") {
         await tx.insert(students).values({
           userId: createUser.id,
@@ -72,8 +79,18 @@ export const createMemberAction = async (
         });
       }
     });
+
+    return { success: true };
   } catch (error) {
-    console.log(error);
+    // Tangkap error dan kembalikan pesan yang relevan
+    console.error(error);
+
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+
+    // Jika error bukan instance dari `Error`, kembalikan error generik
+    return { error: "An unexpected error occurred", details: error };
   }
 };
 

@@ -29,9 +29,7 @@ const BaseSchema = {
   gender: z.enum(["L", "P"], {
     required_error: "Jenis kelamin harus dipilih.",
   }),
-  address: z.string().min(10, {
-    message: "Alamat harus diisi minimal 10 karakter.",
-  }),
+  address: z.string().optional(),
   createdBy: z.string(),
 };
 
