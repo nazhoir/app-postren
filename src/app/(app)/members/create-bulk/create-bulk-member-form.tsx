@@ -96,7 +96,7 @@ const ROLES_MAP = {
   "1": "student",
   "2": "guardian",
 } as const;
-
+import { parse, isValid, format } from "date-fns";
 const ACCEPTED_FILE_TYPES = [".xlsx", ".xls", ".csv"];
 const TEMPLATE_HEADERS = [
   "nama",
@@ -156,7 +156,10 @@ export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
       nisn: entry.nisn ?? "",
       name: entry.nama,
       birthPlace: entry.tempat_lahir,
-      birthDate: entry.tanggal_lahir,
+      birthDate: format(
+        parse(entry.tanggal_lahir, "dd/MM/yyyy", new Date()),
+        "yyyy-MM-dd",
+      ),
       gender: entry.kelamin,
       address: "",
       createdBy,
