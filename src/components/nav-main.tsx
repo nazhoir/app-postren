@@ -15,6 +15,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -30,7 +31,13 @@ interface NavItem {
   }[];
 }
 
-export function NavMain({ items }: { items: NavItem[] }) {
+export function NavMain({
+  label,
+  items,
+}: {
+  label?: string;
+  items: NavItem[];
+}) {
   const pathname = usePathname();
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
 
@@ -65,6 +72,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
 
   return (
     <SidebarGroup>
+      {label ?? <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => {
           const isActive = isItemActive(item);

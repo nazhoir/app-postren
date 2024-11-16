@@ -5,7 +5,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Postren",
+  title: "Postren | Portal Satu Pintu Layanan Pendidikan Moderen",
   description: "Portal Satu Pintu Layanan Pendidikan Moderen",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

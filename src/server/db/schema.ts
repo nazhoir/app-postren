@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  date,
   index,
   integer,
   pgTableCreator,
@@ -10,30 +11,35 @@ import {
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
-// Optimize timestamp columns by using a more efficient format
+// Konstanta untuk timestamp columns
+const TIMESTAMP_CONFIG = { mode: "date" } as const;
+
+// Optimize timestamp columns
 const baseColumns = {
-  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
-  deletedAt: timestamp("deleted_at", { mode: "date" }),
+  createdAt: timestamp("created_at", TIMESTAMP_CONFIG).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", TIMESTAMP_CONFIG).defaultNow().notNull(),
+  deletedAt: timestamp("deleted_at", TIMESTAMP_CONFIG),
 };
 
-// Simplified table creator
+// Table creator dengan prefix yang lebih pendek
 const createTable = pgTableCreator((name) => `p_${name}`);
 
-// Optimize string lengths based on actual needs
+// Optimasi panjang string berdasarkan kebutuhan
 const STRING_LENGTHS = {
   ID: 36, // UUID length
-  EMAIL: 255,
-  NAME: 255,
-  USERNAME: 50,
-  PASSWORD: 255, // bcrypt hash length
-  URL: 255,
-  ROLE: 255,
-  TOKEN: 255,
-  NIS: 20,
+  EMAIL: 255, // Standard email length
+  NAME: 100, // Reduced from 255 to 100 for typical names
+  USERNAME: 30, // Reduced from 50 to 30 for typical usernames
+  PASSWORD: 255, // Reduced to 60 for bcrypt hash
+  URL: 2048, // Increased for long URLs
+  ROLE: 20, // Reduced from 255 to 20 for role names
+  TOKEN: 255, // Token length
+  NIS: 20, // Student number length
+  SHORTNAME: 10, // Added for institution shortnames
+  TYPE: 20, // Added for various type fields
 } as const;
 
-// Users table with optimized column sizes
+// Users table dengan column sizes yang dioptimalkan
 export const users = createTable(
   "user",
   {
@@ -44,9 +50,12 @@ export const users = createTable(
     name: varchar("name", { length: STRING_LENGTHS.NAME }),
     username: varchar("username", { length: STRING_LENGTHS.USERNAME }).unique(),
     email: varchar("email", { length: STRING_LENGTHS.EMAIL }).unique(),
-    emailVerified: timestamp("email_verified", { mode: "date" }).default(
-      sql`CURRENT_TIMESTAMP`,
-    ),
+    nik: varchar("nik", { length: STRING_LENGTHS.NIS }).unique(),
+    nkk: varchar("nkk", { length: STRING_LENGTHS.NIS }),
+    birthPlace: varchar("birth_place", { length: STRING_LENGTHS.NAME }),
+    birthDate: date("birth_date"),
+    gender: varchar("gender", { length: 1 }), // Optimized to single character M/F
+    emailVerified: timestamp("email_verified", TIMESTAMP_CONFIG),
     password: varchar("password", { length: STRING_LENGTHS.PASSWORD }),
     image: varchar("image", { length: STRING_LENGTHS.URL }),
     ...baseColumns,
@@ -54,10 +63,11 @@ export const users = createTable(
   (table) => ({
     emailIdx: index("user_email_idx").on(table.email),
     usernameIdx: index("user_username_idx").on(table.username),
+    nikIdx: index("user_nik_idx").on(table.nik), // Added index for NIK lookups
   }),
 );
 
-// Students table with optimized NISN length
+// Students table dengan optimasi
 export const students = createTable(
   "student",
   {
@@ -65,15 +75,22 @@ export const students = createTable(
       .notNull()
       .references(() => users.id)
       .primaryKey(),
+    organizationId: varchar("organization_id", { length: STRING_LENGTHS.ID })
+      .notNull()
+      .references(() => organizations.id),
     nisn: varchar("nisn", { length: STRING_LENGTHS.NIS }).notNull().unique(),
+    createdBy: varchar("created_by", { length: STRING_LENGTHS.ID })
+      .notNull()
+      .references(() => users.id),
     ...baseColumns,
   },
   (table) => ({
     nisnIdx: index("student_nisn_idx").on(table.nisn),
+    orgIdx: index("student_org_idx").on(table.organizationId), // Added for better query performance
   }),
 );
 
-// Institutions table with optimized column sizes
+// Institutions table dengan optimasi
 export const institutions = createTable(
   "institution",
   {
@@ -82,23 +99,26 @@ export const institutions = createTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name", { length: STRING_LENGTHS.NAME }).notNull(),
-    shortname: varchar("shortname", { length: STRING_LENGTHS.NIS }).unique(),
+    shortname: varchar("shortname", {
+      length: STRING_LENGTHS.SHORTNAME,
+    }).unique(),
     image: varchar("image", { length: STRING_LENGTHS.URL }),
-    type: varchar("type", { length: 255 }),
+    type: varchar("type", { length: STRING_LENGTHS.TYPE }),
     organizationId: varchar("organization_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => organizations.id),
-    statistic: varchar("", { length: 255 }),
-    statisticType: varchar("", { length: 255 }),
+    statistic: text("statistic"), // Changed to text for flexible JSON storage
+    statisticType: varchar("statistic_type", { length: STRING_LENGTHS.TYPE }),
     ...baseColumns,
   },
   (table) => ({
     nameIdx: index("institution_name_idx").on(table.name),
     shortnameIdx: index("institution_shortname_idx").on(table.shortname),
+    orgIdx: index("institution_org_idx").on(table.organizationId),
   }),
 );
 
-// Junction table with optimized column sizes
+// Junction table dengan optimasi
 export const studentsToInstitutions = createTable(
   "students_institutions",
   {
@@ -108,9 +128,7 @@ export const studentsToInstitutions = createTable(
     institutionId: varchar("institution_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => institutions.id),
-    nisLocal: varchar("nis_local", { length: STRING_LENGTHS.NIS })
-      .notNull()
-      .unique(),
+    nisLocal: varchar("nis_local", { length: STRING_LENGTHS.NIS }).unique(),
     ...baseColumns,
   },
   (table) => ({
@@ -121,7 +139,7 @@ export const studentsToInstitutions = createTable(
   }),
 );
 
-// Organizations table with optimized column sizes
+// Organizations table dengan optimasi
 export const organizations = createTable(
   "organization",
   {
@@ -130,7 +148,7 @@ export const organizations = createTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name", { length: STRING_LENGTHS.NAME }).notNull(),
-    type: varchar("type", { length: STRING_LENGTHS.ROLE }).notNull(),
+    type: varchar("type", { length: STRING_LENGTHS.TYPE }).notNull(),
     ...baseColumns,
   },
   (table) => ({
@@ -139,7 +157,7 @@ export const organizations = createTable(
   }),
 );
 
-// Junction table for users and organizations with optimized column sizes
+// Junction table untuk users dan organizations dengan optimasi
 export const usersToOrganizations = createTable(
   "users_to_organizations",
   {
@@ -149,13 +167,20 @@ export const usersToOrganizations = createTable(
     organizationId: varchar("organization_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => organizations.id),
+    createdBy: varchar("created_by", { length: STRING_LENGTHS.ID }).references(
+      () => users.id,
+    ),
     ...baseColumns,
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.organizationId] }),
+    createdByIdx: index("users_to_organizations_created_by_idx").on(
+      table.createdBy,
+    ),
   }),
 );
 
+// Organization admins table dengan optimasi
 export const organizationAdmins = createTable(
   "organizations_admins",
   {
@@ -174,24 +199,24 @@ export const organizationAdmins = createTable(
   }),
 );
 
-// OAuth accounts table with optimized column sizes
+// OAuth accounts table dengan optimasi
 export const accounts = createTable(
   "account",
   {
     userId: varchar("user_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => users.id),
-    type: varchar("type", { length: STRING_LENGTHS.ROLE })
+    type: varchar("type", { length: STRING_LENGTHS.TYPE })
       .$type<AdapterAccount["type"]>()
       .notNull(),
-    provider: varchar("provider", { length: STRING_LENGTHS.ROLE }).notNull(),
+    provider: varchar("provider", { length: STRING_LENGTHS.TYPE }).notNull(),
     providerAccountId: varchar("provider_account_id", {
       length: STRING_LENGTHS.ID,
     }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
     expires_at: integer("expires_at"),
-    token_type: varchar("token_type", { length: STRING_LENGTHS.ROLE }),
+    token_type: varchar("token_type", { length: STRING_LENGTHS.TYPE }),
     scope: varchar("scope", { length: STRING_LENGTHS.NAME }),
     id_token: text("id_token"),
     session_state: varchar("session_state", { length: STRING_LENGTHS.NAME }),
@@ -205,7 +230,7 @@ export const accounts = createTable(
   }),
 );
 
-// Sessions table with optimized column sizes
+// Sessions table dengan optimasi
 export const sessions = createTable(
   "session",
   {
@@ -215,7 +240,7 @@ export const sessions = createTable(
     userId: varchar("user_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => users.id),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
+    expires: timestamp("expires", TIMESTAMP_CONFIG).notNull(),
     ...baseColumns,
   },
   (session) => ({
@@ -223,7 +248,7 @@ export const sessions = createTable(
   }),
 );
 
-// Verification tokens table with optimized column sizes
+// Verification tokens table dengan optimasi
 export const verificationTokens = createTable(
   "verification_token",
   {
@@ -231,7 +256,7 @@ export const verificationTokens = createTable(
       length: STRING_LENGTHS.EMAIL,
     }).notNull(),
     token: varchar("token", { length: STRING_LENGTHS.TOKEN }).notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
+    expires: timestamp("expires", TIMESTAMP_CONFIG).notNull(),
     ...baseColumns,
   },
   (vt) => ({
@@ -239,23 +264,38 @@ export const verificationTokens = createTable(
   }),
 );
 
-// Relations definitions
+// Relations definitions dengan tambahan relasi yang lebih jelas
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
   organizations: many(usersToOrganizations),
   admins: many(organizationAdmins),
-  student: many(students),
+  students: many(students),
 }));
 
 export const studentsRelations = relations(students, ({ one, many }) => ({
   user: one(users, { fields: [students.userId], references: [users.id] }),
   institutions: many(studentsToInstitutions),
+  organization: one(organizations, {
+    fields: [students.organizationId],
+    references: [organizations.id],
+  }),
+  createdByUser: one(users, {
+    fields: [students.createdBy],
+    references: [users.id],
+  }),
 }));
 
-export const institutionsRelations = relations(institutions, ({ many }) => ({
-  students: many(studentsToInstitutions),
-}));
+export const institutionsRelations = relations(
+  institutions,
+  ({ many, one }) => ({
+    students: many(studentsToInstitutions),
+    organization: one(organizations, {
+      fields: [institutions.organizationId],
+      references: [organizations.id],
+    }),
+  }),
+);
 
 export const studentsToInstitutionsRelations = relations(
   studentsToInstitutions,
@@ -274,6 +314,7 @@ export const studentsToInstitutionsRelations = relations(
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(usersToOrganizations),
   admins: many(organizationAdmins),
+  institutions: many(institutions),
 }));
 
 export const usersToOrganizationsRelations = relations(
@@ -286,6 +327,10 @@ export const usersToOrganizationsRelations = relations(
     organization: one(organizations, {
       fields: [usersToOrganizations.organizationId],
       references: [organizations.id],
+    }),
+    createdByUser: one(users, {
+      fields: [usersToOrganizations.createdBy],
+      references: [users.id],
     }),
   }),
 );

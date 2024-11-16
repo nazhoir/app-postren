@@ -16,42 +16,25 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { auth } from "@/server/auth";
+import { getOrgsIdByUserId } from "@/server/actions/organizations";
+import { getStudentsByOrgId } from "@/server/actions/students";
 
-export default function Page() {
-  const data = [
-    {
-      id: "ansdkasdnkaj-nasdakls-klwjlwk",
-      type: "Pondok Pesantren",
-      name: "Nurul Jadid Sejati",
-      shortname: "ppnjs",
-      statistc: "13534423234",
-      statistcType: "NSPP",
-    },
-    {
-      id: "ansdkasdnkaj-nasdakls-kfwjlwk",
-      type: "Madrasah Aliyah",
-      name: "Nurul Jadid Sejati",
-      shortname: "manjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-    {
-      id: "ansdkasdqkaj-nasdakls-kfwjlwk",
-      type: "Madrasah Diniyah Takmiliyah Awaliyah",
-      name: "Nurul Jadid Sejati",
-      shortname: "mdtanjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-    {
-      id: "ansdkasdqkaj-nasdakls-kfwjllk",
-      type: "Madrasah Diniyah Takmiliyah Wustha",
-      name: "Nurul Jadid Sejati",
-      shortname: "mdtwnjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-  ];
+export default async function Page() {
+  const session = await auth();
+
+  if (!session) return null;
+
+  const orgId = await getOrgsIdByUserId(session.user.id);
+
+  if (!orgId) return null;
+
+  const data = await getStudentsByOrgId(orgId);
+
+  if (!data) return null;
+
+  console.log(data);
+
   return (
     <div className="h-fit overflow-auto">
       <header className="flex h-16 shrink-0 items-center gap-2">
@@ -75,15 +58,11 @@ export default function Page() {
       </header>
       <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]">
         <div className="grid gap-4 md:grid-cols-2">
-          {data.map((institution) => (
-            <Card key={institution.id}>
+          {data.map((student) => (
+            <Card key={student.user?.id}>
               <CardHeader>
-                <CardTitle>
-                  {institution.type} {institution.name}
-                </CardTitle>
-                <CardDescription>
-                  {institution.statistcType}: {institution.statistc}
-                </CardDescription>
+                <CardTitle>{student.user?.name}</CardTitle>
+                <CardDescription>NISN : {student.nisn}</CardDescription>
               </CardHeader>
             </Card>
           ))}

@@ -67,7 +67,7 @@ export function CreateInstitutionForm({ userId }: { userId: string }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="max-h-[70vh] space-y-6 overflow-scroll"
+        className="max-h-[70vh] space-y-6 overflow-y-scroll pb-4"
       >
         <FormField
           control={form.control}

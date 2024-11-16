@@ -9,13 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { CreateInstitutionForm } from "./create-institution-form";
+import { CreateMemberForm } from "./create-member-form";
 
-export function CreateInstitution({ userId }: { userId: string }) {
+export function CreateMember({ userId }: { userId: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="ml-auto mr-4" size={"sm"}>
+        <Button size={"sm"}>
           <Plus className="h-4 w-4" />
           <span className="ml-1">Tambah</span>
         </Button>
@@ -28,8 +28,7 @@ export function CreateInstitution({ userId }: { userId: string }) {
             account and remove your data from our servers.
           </DialogDescription>
         </DialogHeader>
-
-        <CreateInstitutionForm userId={userId} />
+        <CreateMemberForm userId={userId} />
       </DialogContent>
     </Dialog>
   );

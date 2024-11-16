@@ -13,7 +13,7 @@ export default async function Layout({
   return (
     <SidebarProvider>
       <AppSidebar user={session.user} />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset className="overflow-hidden">{children}</SidebarInset>
     </SidebarProvider>
   );
 }

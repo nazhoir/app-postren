@@ -5,6 +5,7 @@ import { createInstitutionSchema } from "@/schema/institution";
 import { db } from "../db";
 import { institutions, usersToOrganizations } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { getOrgsIdByUserId } from "./organizations";
 
 class OrganizationError extends Error {
   constructor(message: string) {
@@ -24,17 +25,13 @@ export const createInstitution = async (
 
   const data = validatedFields.data;
   try {
-    const getOrgId = await db.query.usersToOrganizations.findFirst({
-      where: eq(usersToOrganizations.userId, data.userId),
-    });
+    const getOrgId = await getOrgsIdByUserId(data.userId);
 
     if (!getOrgId) {
       throw new OrganizationError("Organization not found");
     }
 
-    await db
-      .insert(institutions)
-      .values({ ...data, organizationId: getOrgId.organizationId });
+    await db.insert(institutions).values({ ...data, organizationId: getOrgId });
   } catch (error) {
     if (error instanceof Error) {
       throw error;
@@ -44,16 +41,14 @@ export const createInstitution = async (
 };
 
 export const getInstitutionsByOrgID = async (userId: string) => {
-  const getOrgId = await db.query.usersToOrganizations.findFirst({
-    where: eq(usersToOrganizations.userId, userId),
-  });
+  const getOrgId = await getOrgsIdByUserId(userId);
 
   if (!getOrgId) {
     throw new OrganizationError("Organization not found");
   }
 
   const data = await db.query.institutions.findMany({
-    where: eq(institutions.organizationId, getOrgId.organizationId),
+    where: eq(institutions.organizationId, getOrgId),
   });
 
   return data;
@@ -63,9 +58,7 @@ export const getInstitutionDetailByID = async (
   userId: string,
   institutionId: string,
 ) => {
-  const getOrgId = await db.query.usersToOrganizations.findFirst({
-    where: eq(usersToOrganizations.userId, userId),
-  });
+  const getOrgId = await getOrgsIdByUserId(userId);
 
   if (!getOrgId) {
     throw new OrganizationError("Organization not found");

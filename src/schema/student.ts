@@ -21,6 +21,13 @@ export const getOrganizationStudentsSchema = z.object({
     .optional(),
 });
 
+export const AddOrganizationStudentSchema = z.object({
+  id: z.string(),
+  institutionId: z.string(),
+  createdBy: z.string(),
+  nisn: z.string(),
+});
+
 export type OrganizationStudent = z.infer<typeof getOrganizationStudentsSchema>;
 
 export const getStudentProfilePersonalIdentitySchema = z.object({

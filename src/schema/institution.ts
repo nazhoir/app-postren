@@ -31,7 +31,7 @@ export const createInstitutionSchema = z.object({
     })
     .toUpperCase(),
   shortname: z.string(),
-  type: z.string(),
+  type: z.string().toUpperCase(),
   statistic: z.string().min(5),
   statisticType: z.enum(["NSPP", "NSS", "NSM"]),
   userId: z.string(),
