@@ -43,12 +43,6 @@ export default async function Page() {
         </div>
 
         <div className="ml-auto mr-4 flex space-x-2">
-          <div className="hidden space-x-1 md:flex">
-            <Input className="h-8 w-96" placeholder="Nama atau NIK/NKK" />
-            <Button size={"sm"} variant={"outline"}>
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
           <CreateMember userId={sesssion.user.id} />
           <Button size={"sm"} variant={"outline"} asChild>
             <Link href={"/members/create-bulk"}>

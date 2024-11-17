@@ -44,7 +44,8 @@ export default async function Page({
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="capitalize">
-                  {data.type} {data.name.toLowerCase()}
+                  {data.type?.toLocaleLowerCase()}{" "}
+                  {data.name.toLocaleLowerCase()}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

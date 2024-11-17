@@ -3,7 +3,7 @@
 import type { z } from "zod";
 import { AuthError } from "next-auth";
 
-import { signIn } from "@/server/auth";
+import { signIn, signOut } from "@/server/auth";
 import { db } from "../db";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -47,4 +47,8 @@ export const login = async (
 
     throw error;
   }
+};
+
+export const signOutAction = async () => {
+  await signOut();
 };

@@ -50,10 +50,10 @@ export default async function Page() {
               <Card>
                 <CardHeader>
                   <CardTitle
-                    className="line-clamp-1 uppercase"
-                    title={`${institution.type?.toUpperCase()} ${institution.name}`}
+                    className="line-clamp-1"
+                    title={`${institution.type} ${institution.name}`}
                   >
-                    {institution.type} {institution.name}
+                    {`${institution.type} ${institution.name}`}
                   </CardTitle>
                   <CardDescription>
                     {institution.statisticType}: {institution.statistic}
