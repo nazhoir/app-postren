@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   date,
   index,
@@ -10,7 +10,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
-
+import { nanoid } from "nanoid";
 // Konstanta untuk timestamp columns
 const TIMESTAMP_CONFIG = { mode: "date" } as const;
 
@@ -46,7 +46,7 @@ export const users = createTable(
     id: varchar("id", { length: STRING_LENGTHS.ID })
       .notNull()
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => nanoid(10)),
     name: varchar("name", { length: STRING_LENGTHS.NAME }),
     username: varchar("username", { length: STRING_LENGTHS.USERNAME }).unique(),
     email: varchar("email", { length: STRING_LENGTHS.EMAIL }).unique(),
@@ -97,7 +97,7 @@ export const institutions = createTable(
     id: varchar("id", { length: STRING_LENGTHS.ID })
       .notNull()
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => nanoid(10)),
     name: varchar("name", { length: STRING_LENGTHS.NAME }).notNull(),
     shortname: varchar("shortname", {
       length: STRING_LENGTHS.SHORTNAME,
@@ -146,7 +146,7 @@ export const organizations = createTable(
     id: varchar("id", { length: STRING_LENGTHS.ID })
       .notNull()
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => nanoid(10)),
     name: varchar("name", { length: STRING_LENGTHS.NAME }).notNull(),
     type: varchar("type", { length: STRING_LENGTHS.TYPE }).notNull(),
     ...baseColumns,
