@@ -1,15 +1,13 @@
 "use server";
 
-import { CreateMemberSchema, GetUserByNIKSchema } from "@/schema/members";
 import { type z } from "zod";
 import { db } from "../db";
 import {
   institutions,
-  organizations,
   students,
-  studentsToInstitutions,
+  institutionStudents,
   users,
-  usersToOrganizations,
+  organizationUsers,
 } from "../db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 import { AddOrganizationStudentSchema } from "@/schema/student";
@@ -25,8 +23,8 @@ export const AddOrganizationStudent = async (
 
   const data = validatedFields.data;
   try {
-    const getOrgId = await db.query.usersToOrganizations.findFirst({
-      where: eq(usersToOrganizations.userId, data.createdBy),
+    const getOrgId = await db.query.organizationUsers.findFirst({
+      where: eq(organizationUsers.userId, data.createdBy),
     });
 
     if (!getOrgId) {
@@ -46,11 +44,9 @@ export const AddOrganizationStudent = async (
         })
         .returning({ userId: students.userId });
       if (!createUser) throw new Error("failed");
-      // Create user-organization relationship
-      await tx.insert(studentsToInstitutions).values({
+      await tx.insert(institutionStudents).values({
         studentId: id,
         institutionId,
-        // nisLocal: "41414645",
       });
     });
   } catch (error) {
@@ -62,33 +58,24 @@ export const AddOrganizationStudent = async (
 type UserData = typeof users.$inferSelect;
 type StudentData = typeof students.$inferSelect;
 type InstitutionData = typeof institutions.$inferSelect;
-type StudentToInstitutionData = typeof studentsToInstitutions.$inferSelect;
 
-// Tipe untuk institusi dengan data relasinya
 interface InstitutionWithRelation {
   nisLocal: string | null;
   institution: InstitutionData | null;
 }
 
-// Tipe lengkap untuk student dengan semua relasinya
 export interface StudentWithRelations extends StudentData {
   user: UserData | null;
   institutions: InstitutionWithRelation[];
 }
 
-/**
- * Mengambil data students berdasarkan organization ID beserta relasinya
- * @param organizationId - ID dari organization
- * @returns Array of students dengan relasi institutions dan user data
- */
 export async function getStudentsByOrgId(
   organizationId: string,
 ): Promise<StudentWithRelations[]> {
   try {
-    // Mengambil semua students dari organization tersebut
     const studentResults = await db
       .select({
-        // Student fields - mengambil semua field dari students
+        // Student fields
         userId: students.userId,
         organizationId: students.organizationId,
         nisn: students.nisn,
@@ -102,8 +89,11 @@ export async function getStudentsByOrgId(
           name: users.name,
           email: users.email,
           username: users.username,
+          nationality: users.nationality,
+          country: users.country,
           nik: users.nik,
           nkk: users.nkk,
+          passport: users.passport,
           birthPlace: users.birthPlace,
           birthDate: users.birthDate,
           gender: users.gender,
@@ -124,12 +114,11 @@ export async function getStudentsByOrgId(
         ),
       );
 
-    // Untuk setiap student, ambil data institutions
     const studentsWithInstitutions: StudentWithRelations[] = await Promise.all(
       studentResults.map(async (student) => {
         const institutionRelations = await db
           .select({
-            nisLocal: studentsToInstitutions.nisLocal,
+            nisLocal: institutionStudents.nisLocal,
             institution: {
               id: institutions.id,
               name: institutions.name,
@@ -144,20 +133,19 @@ export async function getStudentsByOrgId(
               deletedAt: institutions.deletedAt,
             },
           })
-          .from(studentsToInstitutions)
+          .from(institutionStudents)
           .leftJoin(
             institutions,
-            eq(institutions.id, studentsToInstitutions.institutionId),
+            eq(institutions.id, institutionStudents.institutionId),
           )
           .where(
             and(
-              eq(studentsToInstitutions.studentId, student.userId),
-              isNull(studentsToInstitutions.deletedAt),
+              eq(institutionStudents.studentId, student.userId),
+              isNull(institutionStudents.deletedAt),
               isNull(institutions.deletedAt),
             ),
           );
 
-        // Mengembalikan student dengan format yang sesuai dengan StudentWithRelations
         return {
           userId: student.userId,
           organizationId: student.organizationId,

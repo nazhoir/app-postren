@@ -1,4 +1,3 @@
-import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import React from "react";
 import {
   Breadcrumb,
@@ -13,9 +12,8 @@ import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { getOrgsMemberByOrgID } from "@/server/actions/members";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw, Search } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { getOrgsIdByUserId } from "@/server/actions/organizations";
-import { Input } from "@/components/ui/input";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
 import Link from "next/link";

@@ -6,7 +6,7 @@ import {
   organizationAdmins,
   organizations,
   users,
-  usersToOrganizations,
+  organizationUsers,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -82,7 +82,7 @@ export const setupAction = async (
       if (!organization) throw new Error("Failed to create organization");
 
       // Create user-organization relationship
-      await tx.insert(usersToOrganizations).values({
+      await tx.insert(organizationUsers).values({
         userId: user.id,
         organizationId: organization.id,
       });

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from "react";
-import readXlsxFile, { Schema } from "read-excel-file";
+import readXlsxFile, { type Schema } from "read-excel-file";
 import * as XLSX from "xlsx";
-import { z } from "zod";
+import { type z } from "zod";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -16,14 +16,13 @@ import {
   Download,
 } from "lucide-react";
 import {
-  Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CreateMemberSchema } from "@/schema/members";
+import { type CreateMemberSchema } from "@/schema/members";
 import { createMemberAction } from "@/server/actions/members";
 
 // Define Excel schema compatible with read-excel-file
@@ -36,12 +35,10 @@ const excelSchema: Schema = {
   nik: {
     prop: "nik",
     type: String,
-    required: true,
   },
   nkk: {
     prop: "nkk",
     type: String,
-    required: true,
   },
   kelamin: {
     prop: "kelamin",
@@ -70,16 +67,30 @@ const excelSchema: Schema = {
     prop: "nisn",
     type: String,
   },
+  kewarganegaraan: {
+    prop: "kewarganegaraan",
+    validate: (value: string): "WNI" | "WNA" | null => {
+      return ["WNI", "WNA"].includes(value) ? (value as "WNI" | "WNA") : null;
+    },
+    required: true,
+  },
+  passpor: {
+    prop: "passpor",
+    type: String,
+  },
 };
 
 // Type for parsed Excel data
 interface ExcelEntry {
   nama: string;
-  nik: string;
-  nkk: string;
-  kelamin: "L" | "P";
+  kewarganegaraan: "WNA" | "WNI";
+  negara?: string;
   tempat_lahir: string;
   tanggal_lahir: string;
+  kelamin: "L" | "P";
+  nik?: string;
+  nkk?: string;
+  passpor?: string;
   role: "1" | "2";
   nisn?: string;
 }
@@ -96,18 +107,8 @@ const ROLES_MAP = {
   "1": "student",
   "2": "guardian",
 } as const;
-import { parse, isValid, format } from "date-fns";
+import { parse, format } from "date-fns";
 const ACCEPTED_FILE_TYPES = [".xlsx", ".xls", ".csv"];
-const TEMPLATE_HEADERS = [
-  "nama",
-  "nik",
-  "nkk",
-  "kelamin",
-  "tempat_lahir",
-  "tanggal_lahir",
-  "role",
-  "nisn",
-] as const;
 
 export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
   const [file, setFile] = useState<File | null>(null);
@@ -148,23 +149,31 @@ export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
     );
   }, []);
 
-  const transformExcelData = useCallback((entry: ExcelEntry): Data => {
-    return {
-      nik: entry.nik,
-      nkk: entry.nkk,
-      role: ROLES_MAP[entry.role] as "student" | "guardian",
-      nisn: entry.nisn ?? "",
-      name: entry.nama,
-      birthPlace: entry.tempat_lahir,
-      birthDate: format(
-        parse(entry.tanggal_lahir, "dd/MM/yyyy", new Date()),
-        "yyyy-MM-dd",
-      ),
-      gender: entry.kelamin,
-      address: "",
-      createdBy,
-    };
-  }, []);
+  const transformExcelData = useCallback(
+    (entry: ExcelEntry): Data => {
+      return {
+        role: ROLES_MAP[entry.role],
+        nisn: entry.nisn ?? "",
+        name: entry.nama,
+        birthPlace: entry.tempat_lahir,
+        birthDate: format(
+          parse(entry.tanggal_lahir, "dd/MM/yyyy", new Date()),
+          "yyyy-MM-dd",
+        ),
+        gender: entry.kelamin,
+        address: "",
+        createdBy,
+        identity: {
+          nationality: entry.kewarganegaraan,
+          country: entry.negara!,
+          passport: entry.passpor ? entry.passpor : "",
+          nik: entry.nik ? entry.nik : "",
+          nkk: entry.nkk ? entry.nkk : "",
+        },
+      };
+    },
+    [createdBy],
+  );
 
   const processExcelFile = async () => {
     if (!file) {
@@ -178,6 +187,7 @@ export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
     setData([]);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-redundant-type-constituents
       const { rows, errors: rowErrors } = await readXlsxFile<ExcelEntry | any>(
         file,
         {
@@ -284,7 +294,7 @@ export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
         toast.success(`User ${value.name} berhasil di input`);
       }
     } catch (error) {
-      toast.error(`Gagal menginput User: ${error}`);
+      toast.error(`Gagal menginput User: ${error as string}`);
       // Looping berhenti ketika error terjadi
     }
   };

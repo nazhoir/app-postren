@@ -3,7 +3,7 @@
 import type { z } from "zod";
 import { createInstitutionSchema } from "@/schema/institution";
 import { db } from "../db";
-import { institutions, usersToOrganizations } from "../db/schema";
+import { institutions } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { getOrgsIdByUserId } from "./organizations";
 

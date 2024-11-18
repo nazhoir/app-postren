@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 const Logo = React.forwardRef<
   SVGSVGElement,
   React.HTMLAttributes<SVGSVGElement>
->(({ className, children, ...props }, ref) => (
+>(({ className, ...props }, ref) => (
   <svg
     ref={ref}
     width="24"

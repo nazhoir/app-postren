@@ -7,7 +7,7 @@ import {
   organizations,
   students,
   users,
-  usersToOrganizations,
+  organizationUsers,
 } from "../db/schema";
 import { eq } from "drizzle-orm";
 
@@ -16,6 +16,8 @@ export const createMemberAction = async (
 ) => {
   // Validasi input menggunakan schema
   const validatedFields = CreateMemberSchema.safeParse(values);
+
+  console.log(validatedFields.error);
   if (!validatedFields.success) {
     return { error: "Invalid fields", details: validatedFields.error };
   }
@@ -24,8 +26,8 @@ export const createMemberAction = async (
 
   try {
     // Ambil organisasi berdasarkan `createdBy`
-    const getOrgId = await db.query.usersToOrganizations.findFirst({
-      where: eq(usersToOrganizations.userId, data.createdBy),
+    const getOrgId = await db.query.organizationUsers.findFirst({
+      where: eq(organizationUsers.userId, data.createdBy),
     });
 
     if (!getOrgId) {
@@ -36,15 +38,14 @@ export const createMemberAction = async (
       name,
       birthDate,
       birthPlace,
-      nik,
-      nkk,
-      address,
+      identity,
+      // address,
       createdBy,
       gender,
       role,
       nisn,
     } = data;
-
+    const { nationality, country, nik, nkk, passport } = identity;
     // Lakukan transaksi database
     await db.transaction(async (tx) => {
       // Tambah data pengguna ke tabel `users`
@@ -54,16 +55,19 @@ export const createMemberAction = async (
           name,
           birthDate,
           birthPlace,
-          nik,
-          nkk,
+          nationality,
+          country,
+          passport: passport!.length > 1 ? passport : undefined,
+          nik: nik.length > 1 ? nik : undefined,
+          nkk: nkk.length > 1 ? nkk : undefined,
           gender,
         })
         .returning({ id: users.id });
 
       if (!createUser) throw new Error("Failed to create user");
 
-      // Tambah relasi pengguna-organisasi ke tabel `usersToOrganizations`
-      await tx.insert(usersToOrganizations).values({
+      // Tambah relasi pengguna-organisasi ke tabel `organizationUsers`
+      await tx.insert(organizationUsers).values({
         userId: createUser.id,
         organizationId: getOrgId.organizationId,
         createdBy,
@@ -110,10 +114,10 @@ export const getOrgsMemberByOrgID = async (organizationId: string) => {
       },
     })
     .from(users)
-    .innerJoin(usersToOrganizations, eq(usersToOrganizations.userId, users.id))
+    .innerJoin(organizationUsers, eq(organizationUsers.userId, users.id))
     .innerJoin(
       organizations,
-      eq(organizations.id, usersToOrganizations.organizationId),
+      eq(organizations.id, organizationUsers.organizationId),
     )
     .where(eq(organizations.id, organizationId));
 
