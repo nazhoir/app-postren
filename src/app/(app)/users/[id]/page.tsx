@@ -90,7 +90,7 @@ const ProfileLoadingSkeleton = () => (
 );
 
 const MainContent = ({ data, orgID }: { data: UserProfile; orgID: string }) => (
-  <main className="flex flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 pb-6 lg:h-[85vh]">
+  <main className="text-sm flex flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 pb-6 lg:h-[85vh]">
     <div className="pt-6 lg:w-full">
       <div className="md:grid md:grid-cols-7">
         <Avatar className="mx-auto h-32 w-32 rounded-lg border md:sticky md:top-8">
@@ -149,18 +149,17 @@ const UserDetails = ({ data, orgID }: { data: UserProfile; orgID: string }) => {
       <DetailRow label="Negara" value={data.country} />
       <EmailDetails email={data.email} emailVerified={data.emailVerified} />
 
-
-<div className="mt-4">
-<h2 className="font-bold">Alamat</h2>
-      <DetailRow label="Alamat lengkap" value={data.address?.fullAddress} />
-      <DetailRow label="RT" value={data.address?.rt} />
-      <DetailRow label="RW" value={data.address?.rw} />
-      <DetailRow label="Desa" value={data.address?.village} />
-      <DetailRow label="Kecamatan" value={data.address?.district} />
-      <DetailRow label="Kabupaten" value={data.address?.regency} />
-      <DetailRow label="Provinsi" value={data.address?.province} />
-      <DetailRow label="Kode pos" value={data.address?.postalCode} />
-</div>
+      <div className="mt-4">
+        <h2 className="font-bold">Alamat</h2>
+        <DetailRow label="Alamat lengkap" value={data.address?.fullAddress} />
+        <DetailRow label="RT" value={data.address?.rt} />
+        <DetailRow label="RW" value={data.address?.rw} />
+        <DetailRow label="Desa" value={data.address?.village} />
+        <DetailRow label="Kecamatan" value={data.address?.district} />
+        <DetailRow label="Kabupaten" value={data.address?.regency} />
+        <DetailRow label="Provinsi" value={data.address?.province} />
+        <DetailRow label="Kode pos" value={data.address?.postalCode} />
+      </div>
       {data.nisn ? (
         <>
           <DetailRow label="Wali" value={getGuardianType()} />
@@ -223,7 +222,7 @@ async function ParentProfile({
     motherId: null,
     guardianId: null,
     guardianType: null,
-    domicileSameAsAddress: null
+    domicileSameAsAddress: null,
   };
   const req = await getOrgUserProfile(userID, orgID);
 

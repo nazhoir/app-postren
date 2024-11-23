@@ -122,7 +122,6 @@ export default function EditUserForm({ data }: EditUserFormProps) {
       const normalizedCurrent = normalizeFormValues(currentValues);
       const normalizedInitial = normalizeFormValues(initialValues);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const hasChanges = !isEqual(normalizedCurrent, normalizedInitial);
       setIsFormChanged(hasChanges);
     },
@@ -153,6 +152,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
       form.reset(submissionData); // Reset form with new values
       setIsFormChanged(false);
       toast.success("Data berhasil disimpan");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Gagal menyimpan data");
     }

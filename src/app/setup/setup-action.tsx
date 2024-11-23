@@ -104,7 +104,6 @@ export const setupAction = async (
       data: result,
     };
   } catch (error) {
-
     return {
       success: false,
       message:

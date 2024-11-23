@@ -154,13 +154,19 @@ export const updateUserProfile = async (
 
         const { id: existingAddressId, ...addressData } = address;
 
+        // Ensure we have actual data to update/insert
+        if (Object.keys(addressData).length === 0) {
+          return existingAddressId ?? undefined;
+        }
+
         if (existingAddressId) {
           // Update existing address
-          await tx
+          const [updatedAddress] = await tx
             .update(addresses)
             .set(addressData)
-            .where(eq(addresses.id, existingAddressId));
-          return existingAddressId;
+            .where(eq(addresses.id, existingAddressId))
+            .returning({ id: addresses.id });
+          return updatedAddress?.id;
         }
 
         // Create new address
@@ -177,13 +183,19 @@ export const updateUserProfile = async (
 
         const { id: existingDomicileId, ...domicileData } = domicile;
 
+        // Ensure we have actual data to update/insert
+        if (Object.keys(domicileData).length === 0) {
+          return existingDomicileId ?? undefined;
+        }
+
         if (existingDomicileId) {
           // Update existing domicile
-          await tx
+          const [updatedDomicile] = await tx
             .update(addresses)
             .set(domicileData)
-            .where(eq(addresses.id, existingDomicileId));
-          return existingDomicileId;
+            .where(eq(addresses.id, existingDomicileId))
+            .returning({ id: addresses.id });
+          return updatedDomicile?.id;
         }
 
         // Create new domicile
@@ -194,14 +206,22 @@ export const updateUserProfile = async (
         return newDomicile?.id;
       })();
 
+      // Prepare user update data
+      const userUpdateData = {
+        ...userData,
+        ...(addressId !== undefined && { addressId }),
+        ...(domicileId !== undefined && { domicileId }),
+      };
+
+      // Check if there are actual values to update
+      if (Object.keys(userUpdateData).length === 0) {
+        throw new Error("No values provided for update");
+      }
+
       // Update user data including address and domicile references
       const [updatedUser] = await tx
         .update(users)
-        .set({
-          ...userData,
-          ...(addressId && { addressId }),
-          ...(domicileId && { domicileId }),
-        })
+        .set(userUpdateData)
         .where(eq(users.id, userData.id))
         .returning({
           id: users.id,
@@ -210,6 +230,10 @@ export const updateUserProfile = async (
           addressId: users.addressId,
           domicileId: users.domicileId,
         });
+
+      if (!updatedUser) {
+        throw new Error("User not found");
+      }
 
       return { success: true, data: updatedUser };
     });
