@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 
 export default async function Page() {
   const data = await countOrganization();
-  if (data > 0) redirect("/auth/login");
+  if (data > 0) redirect("/");
   return (
     <>
       <header className="border-b">

@@ -24,7 +24,7 @@ export const getOrganizationStudentsSchema = z.object({
 export const AddOrganizationStudentSchema = z.object({
   id: z.string(),
   institutionId: z.string(),
-  createdBy: z.string(),
+  invitedBy: z.string(),
   nisn: z.string(),
 });
 

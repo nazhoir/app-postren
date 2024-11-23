@@ -36,8 +36,9 @@ const BaseSchema = z.object({
   gender: z.enum(["L", "P"], {
     required_error: "Jenis kelamin harus dipilih.",
   }),
+  registrationNumber: z.string().optional(),
   address: z.string().optional(),
-  createdBy: z.string(),
+  invitedBy: z.string(),
 });
 
 // Schema utama

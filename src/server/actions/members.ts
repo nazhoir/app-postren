@@ -8,8 +8,10 @@ import {
   students,
   users,
   organizationUsers,
+  employees,
 } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { generateRegistrationNumber } from "@/lib/generate-id";
 
 export const createMemberAction = async (
   values: z.infer<typeof CreateMemberSchema>,
@@ -17,7 +19,6 @@ export const createMemberAction = async (
   // Validasi input menggunakan schema
   const validatedFields = CreateMemberSchema.safeParse(values);
 
-  console.log(validatedFields.error);
   if (!validatedFields.success) {
     return { error: "Invalid fields", details: validatedFields.error };
   }
@@ -25,9 +26,9 @@ export const createMemberAction = async (
   const data = validatedFields.data;
 
   try {
-    // Ambil organisasi berdasarkan `createdBy`
+    // Ambil organisasi berdasarkan `invitedBy`
     const getOrgId = await db.query.organizationUsers.findFirst({
-      where: eq(organizationUsers.userId, data.createdBy),
+      where: eq(organizationUsers.userId, data.invitedBy),
     });
 
     if (!getOrgId) {
@@ -40,12 +41,14 @@ export const createMemberAction = async (
       birthPlace,
       identity,
       // address,
-      createdBy,
+      invitedBy,
       gender,
       role,
       nisn,
+      registrationNumber,
     } = data;
     const { nationality, country, nik, nkk, passport } = identity;
+
     // Lakukan transaksi database
     await db.transaction(async (tx) => {
       // Tambah data pengguna ke tabel `users`
@@ -61,6 +64,9 @@ export const createMemberAction = async (
           nik: nik.length > 1 ? nik : undefined,
           nkk: nkk.length > 1 ? nkk : undefined,
           gender,
+          registrationNumber:
+            registrationNumber ?? generateRegistrationNumber(gender, birthDate),
+          invitedBy,
         })
         .returning({ id: users.id });
 
@@ -70,16 +76,22 @@ export const createMemberAction = async (
       await tx.insert(organizationUsers).values({
         userId: createUser.id,
         organizationId: getOrgId.organizationId,
-        createdBy,
+        invitedBy,
       });
 
       // Jika role adalah siswa, tambahkan data ke tabel `students`
       if (role === "student") {
         await tx.insert(students).values({
-          userId: createUser.id,
+          id: createUser.id,
           organizationId: getOrgId.organizationId,
           nisn: nisn,
-          createdBy,
+          invitedBy,
+        });
+      } else if (role === "employee") {
+        await tx.insert(employees).values({
+          id: createUser.id,
+          organizationId: getOrgId.organizationId,
+          invitedBy,
         });
       }
     });
@@ -111,6 +123,7 @@ export const getOrgsMemberByOrgID = async (organizationId: string) => {
         gender: users.gender,
         nik: users.nik,
         nkk: users.nkk,
+        registrationNumber: users.registrationNumber,
       },
     })
     .from(users)
@@ -131,6 +144,7 @@ export const getOrgsMemberByOrgID = async (organizationId: string) => {
     gender: users.gender,
     nik: users.nik,
     nkk: users.nkk,
+    registrationNumber: users.registrationNumber,
   }));
 };
 

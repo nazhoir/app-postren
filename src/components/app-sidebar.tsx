@@ -77,6 +77,12 @@ const navItems = [
         title: "Anggota",
         url: "/members",
         icon: Users2,
+        items: [
+          {
+            title: "Kartu ID",
+            url: "/members/card",
+          },
+        ],
       },
       {
         title: "Peserta didik",
@@ -102,8 +108,8 @@ const navItems = [
         ],
       },
       {
-        title: "Guru dan Tendik",
-        url: "/gtk",
+        title: "Pegawai",
+        url: "/employees",
         icon: BriefcaseBusiness,
         items: [
           {

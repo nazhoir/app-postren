@@ -38,9 +38,9 @@ const defaultValues: Partial<FormValues> = {
 
 export function CreateStudentForm({
   institutions,
-  createdBy,
+  invitedBy,
 }: {
-  createdBy: string;
+  invitedBy: string;
   institutions: { id: string; name: string; type: string | null }[];
 }) {
   const form = useForm<FormValues>({
@@ -101,7 +101,7 @@ export function CreateStudentForm({
             <AddStudentDialog
               userId={user.id}
               institutions={institutions}
-              createdBy={createdBy}
+              invitedBy={invitedBy}
             />
           </CardHeader>
         </Card>

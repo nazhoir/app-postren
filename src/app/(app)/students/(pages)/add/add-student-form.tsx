@@ -26,10 +26,10 @@ import { AddOrganizationStudent } from "@/server/actions/students";
 export default function AddStudentForm({
   userId,
   institutions,
-  createdBy,
+  invitedBy,
 }: {
   userId: string;
-  createdBy: string;
+  invitedBy: string;
   institutions: {
     id: string;
     name: string;
@@ -39,7 +39,7 @@ export default function AddStudentForm({
   type FormValues = z.infer<typeof AddOrganizationStudentSchema>;
   const defaultValues: Partial<FormValues> = {
     id: userId,
-    createdBy,
+    invitedBy,
     institutionId: "",
     nisn: "",
   };

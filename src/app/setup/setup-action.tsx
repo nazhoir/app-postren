@@ -104,7 +104,6 @@ export const setupAction = async (
       data: result,
     };
   } catch (error) {
-    console.error("Setup action error:", error);
 
     return {
       success: false,

@@ -1,9 +1,3 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import React from "react";
 import {
   Breadcrumb,
@@ -19,6 +13,8 @@ import Link from "next/link";
 import { auth } from "@/server/auth";
 import { getOrgsIdByUserId } from "@/server/actions/organizations";
 import { getStudentsByOrgId } from "@/server/actions/students";
+import { DataTable } from "./components/data-table";
+import { columns } from "./components/columns";
 
 export default async function Page() {
   const session = await auth();
@@ -55,16 +51,7 @@ export default async function Page() {
         </Button>
       </header>
       <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]">
-        <div className="grid gap-4 md:grid-cols-2">
-          {data.map((student) => (
-            <Card key={student.user?.id}>
-              <CardHeader>
-                <CardTitle>{student.user?.name}</CardTitle>
-                <CardDescription>NISN : {student.nisn}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <DataTable data={data} columns={columns} />
       </main>
     </div>
   );

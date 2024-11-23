@@ -3,7 +3,6 @@
 import { type z } from "zod";
 import { db } from "../db";
 import {
-  institutions,
   students,
   institutionStudents,
   users,
@@ -24,25 +23,25 @@ export const AddOrganizationStudent = async (
   const data = validatedFields.data;
   try {
     const getOrgId = await db.query.organizationUsers.findFirst({
-      where: eq(organizationUsers.userId, data.createdBy),
+      where: eq(organizationUsers.userId, data.invitedBy),
     });
 
     if (!getOrgId) {
       throw new Error("Organization not found");
     }
 
-    const { id, institutionId, nisn, createdBy } = data;
+    const { id, institutionId, nisn, invitedBy } = data;
 
     await db.transaction(async (tx) => {
       const [createUser] = await tx
         .insert(students)
         .values({
-          userId: id,
+          id: id,
           organizationId: getOrgId.organizationId,
           nisn,
-          createdBy,
+          invitedBy,
         })
-        .returning({ userId: students.userId });
+        .returning({ id: students.id });
       if (!createUser) throw new Error("failed");
       await tx.insert(institutionStudents).values({
         studentId: id,
@@ -50,47 +49,33 @@ export const AddOrganizationStudent = async (
       });
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
-// Definisikan tipe untuk setiap bagian data
-type UserData = typeof users.$inferSelect;
-type StudentData = typeof students.$inferSelect;
-type InstitutionData = typeof institutions.$inferSelect;
-
-interface InstitutionWithRelation {
-  nisLocal: string | null;
-  institution: InstitutionData | null;
+interface GetStudentsByOrgIdResult {
+  id: string;
+  name: string | null | undefined;
+  gender: string | null | undefined;
+  nisn: string;
+  nik: string | null | undefined;
+  nkk: string | null | undefined;
+  birthPlace: string | null | undefined;
+  birthDate: string | null | undefined;
 }
-
-export interface StudentWithRelations extends StudentData {
-  user: UserData | null;
-  institutions: InstitutionWithRelation[];
-}
-
 export async function getStudentsByOrgId(
   organizationId: string,
-): Promise<StudentWithRelations[]> {
+): Promise<GetStudentsByOrgIdResult[]> {
   try {
     const studentResults = await db
       .select({
         // Student fields
-        userId: students.userId,
-        organizationId: students.organizationId,
+        id: students.id,
         nisn: students.nisn,
-        createdBy: students.createdBy,
-        createdAt: students.createdAt,
-        updatedAt: students.updatedAt,
-        deletedAt: students.deletedAt,
+        joiningDate: students.joiningDate,
         // User fields
         user: {
-          id: users.id,
           name: users.name,
-          email: users.email,
-          username: users.username,
-          nationality: users.nationality,
-          country: users.country,
           nik: users.nik,
           nkk: users.nkk,
           passport: users.passport,
@@ -98,15 +83,11 @@ export async function getStudentsByOrgId(
           birthDate: users.birthDate,
           gender: users.gender,
           image: users.image,
-          emailVerified: users.emailVerified,
-          password: users.password,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-          deletedAt: users.deletedAt,
+          registrationNumber: users.registrationNumber,
         },
       })
       .from(students)
-      .leftJoin(users, eq(users.id, students.userId))
+      .leftJoin(users, eq(users.id, students.id))
       .where(
         and(
           eq(students.organizationId, organizationId),
@@ -114,53 +95,22 @@ export async function getStudentsByOrgId(
         ),
       );
 
-    const studentsWithInstitutions: StudentWithRelations[] = await Promise.all(
-      studentResults.map(async (student) => {
-        const institutionRelations = await db
-          .select({
-            nisLocal: institutionStudents.nisLocal,
-            institution: {
-              id: institutions.id,
-              name: institutions.name,
-              shortname: institutions.shortname,
-              type: institutions.type,
-              image: institutions.image,
-              organizationId: institutions.organizationId,
-              statistic: institutions.statistic,
-              statisticType: institutions.statisticType,
-              createdAt: institutions.createdAt,
-              updatedAt: institutions.updatedAt,
-              deletedAt: institutions.deletedAt,
-            },
-          })
-          .from(institutionStudents)
-          .leftJoin(
-            institutions,
-            eq(institutions.id, institutionStudents.institutionId),
-          )
-          .where(
-            and(
-              eq(institutionStudents.studentId, student.userId),
-              isNull(institutionStudents.deletedAt),
-              isNull(institutions.deletedAt),
-            ),
-          );
-
-        return {
-          userId: student.userId,
-          organizationId: student.organizationId,
-          nisn: student.nisn,
-          createdBy: student.createdBy,
-          createdAt: student.createdAt,
-          updatedAt: student.updatedAt,
-          deletedAt: student.deletedAt,
-          user: student.user,
-          institutions: institutionRelations,
-        };
+    const data: GetStudentsByOrgIdResult[] = studentResults.map(
+      ({ nisn, user, id }) => ({
+        id,
+        name: user?.name,
+        gender: user?.gender,
+        nisn,
+        nik: user?.nik,
+        nkk: user?.nkk,
+        birthPlace: user?.birthPlace,
+        birthDate: user?.birthDate,
       }),
     );
 
-    return studentsWithInstitutions;
+    return data;
+
+    // return studentsWithInstitutions;
   } catch (error) {
     console.error("Error in getStudentsByOrgId:", error);
     throw new Error("Failed to fetch students data");

@@ -2,26 +2,33 @@ import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { CreateStudentForm } from "./create-student-form";
 import { auth } from "@/server/auth";
-import { getInstitutionsByOrgID } from "@/server/actions/institutions";
+import { getOrgsIdByUserId } from "@/server/actions/organizations";
+import { getEmployeesByOrgId } from "@/server/actions/employees";
+import { DataTable } from "./components/data-table";
+import { columns } from "./components/columns";
 
 export default async function Page() {
   const session = await auth();
 
   if (!session) return null;
 
-  const data = await getInstitutionsByOrgID(session.user.id);
+  const orgId = await getOrgsIdByUserId(session.user.id);
+
+  if (!orgId) return null;
+
+  const data = await getEmployeesByOrgId(orgId);
+
+  if (!data) return null;
+
   return (
     <div className="h-fit overflow-auto">
       <header className="flex h-16 shrink-0 items-center gap-2">
@@ -31,24 +38,20 @@ export default async function Page() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/students">Peserta Didik</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Tambah</BreadcrumbPage>
+                <BreadcrumbPage>Pegawai</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <Button className="ml-auto mr-4" size={"sm"}>
-          <Plus className="h-4 w-4" />
-          <span className="ml-1 hidden md:block">Tambah Masal</span>
+        <Button className="ml-auto mr-4" asChild>
+          <Link href={"/employees/add"}>
+            <Plus className="h-4 w-4" />
+            <span className="ml-1">Tambah</span>
+          </Link>
         </Button>
       </header>
       <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]">
-        <CreateStudentForm institutions={data} createdBy={session.user.id} />
+        <DataTable data={data} columns={columns} />
       </main>
     </div>
   );

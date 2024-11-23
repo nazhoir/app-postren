@@ -8,7 +8,7 @@ export default async function Page() {
   if (!sesssion) redirect("/auth/login");
   return (
     <div>
-      <CreateBulkMemberForm createdBy={sesssion.user.id} />
+      <CreateBulkMemberForm invitedBy={sesssion.user.id} />
     </div>
   );
 }

@@ -47,6 +47,22 @@ export const columns: ColumnDef<Task>[] = [
     enableSorting: false,
     enableHiding: false,
   },
+
+  {
+    accessorKey: "registrationNumber",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Nomor Induk" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-36 truncate font-medium">
+            {row.getValue("registrationNumber")}
+          </span>
+        </div>
+      );
+    },
+  },
   {
     accessorKey: "name",
     header: ({ column }) => (

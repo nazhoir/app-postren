@@ -1,9 +1,10 @@
-import { index, primaryKey, varchar } from "drizzle-orm/pg-core";
-import { baseColumns, createTable, STRING_LENGTHS } from "./etc";
-import { nanoid } from "@/lib/nanoid";
-import { users } from "./users";
-import { institutions } from "./institutions";
 import { relations } from "drizzle-orm";
+import { index, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { nanoid } from "@/lib/generate-id";
+import { baseColumns, createTable, STRING_LENGTHS } from "../core/base";
+import { users } from "../identity/users";
+import { institutions } from "../institution/institutions";
+import { cardID } from "../identity/cards";
 
 export const organizations = createTable(
   "organization",
@@ -11,7 +12,7 @@ export const organizations = createTable(
     id: varchar("id", { length: STRING_LENGTHS.ID })
       .notNull()
       .primaryKey()
-      .$defaultFn(() => nanoid(10)),
+      .$defaultFn(() => nanoid()),
     name: varchar("name", { length: STRING_LENGTHS.NAME }).notNull(),
     type: varchar("type", { length: STRING_LENGTHS.TYPE }).notNull(),
     ...baseColumns,
@@ -31,15 +32,15 @@ export const organizationUsers = createTable(
     organizationId: varchar("organization_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => organizations.id),
-    createdBy: varchar("created_by", { length: STRING_LENGTHS.ID }).references(
+    invitedBy: varchar("created_by", { length: STRING_LENGTHS.ID }).references(
       () => users.id,
     ),
     ...baseColumns,
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.organizationId] }),
-    createdByIdx: index("users_to_organizations_created_by_idx").on(
-      table.createdBy,
+    invitedByIdx: index("users_to_organizations_created_by_idx").on(
+      table.invitedBy,
     ),
   }),
 );
@@ -66,6 +67,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(organizationUsers),
   admins: many(organizationAdmins),
   institutions: many(institutions),
+  issuedCard: many(cardID),
 }));
 
 export const organizationUsersRelations = relations(
@@ -79,8 +81,8 @@ export const organizationUsersRelations = relations(
       fields: [organizationUsers.organizationId],
       references: [organizations.id],
     }),
-    createdByUser: one(users, {
-      fields: [organizationUsers.createdBy],
+    invitedByUser: one(users, {
+      fields: [organizationUsers.invitedBy],
       references: [users.id],
     }),
   }),

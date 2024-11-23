@@ -1,16 +1,12 @@
-import { Footer } from "@/components/footer";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { auth } from "@/server/auth";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  return (
-    <>
-      <main className="container mx-auto flex min-h-screen items-center justify-center px-8 py-20">
-        <Button className="w-full lg:w-32" asChild>
-          <Link href={"/auth/login"}>Login</Link>
-        </Button>
-      </main>
-      <Footer />
-    </>
-  );
+export default async function HomePage() {
+  const session = await auth();
+
+  if (!session) {
+    redirect("/auth/login");
+  } else {
+    redirect("/dashboard");
+  }
 }

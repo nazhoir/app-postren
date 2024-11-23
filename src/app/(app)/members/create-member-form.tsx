@@ -36,7 +36,7 @@ export function CreateMemberForm({ userId }: { userId: string }) {
     birthDate: "",
     gender: undefined,
     address: "",
-    createdBy: userId,
+    invitedBy: userId,
     role: undefined,
     nisn: "",
     identity: {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AddressSchema } from "./address";
 
 export const CreateUserSchema = z.object({
   name: z
@@ -103,3 +104,57 @@ export const CreateStudentSchema = z.object({
   organizationId: z.string(),
   institutionId: z.string().optional(),
 });
+
+export const EditUserSchema = z
+  .object({
+    id: z.string(),
+    name: z.string().min(2, {
+      message: "Nama harus diisi minimal 2 karakter.",
+    }),
+    birthPlace: z
+      .string()
+      .min(1, {
+        message: "Tempat lahir harus diisi.",
+      })
+      .optional(),
+    birthDate: z
+      .string()
+      .min(1, {
+        message: "Tanggal lahir harus diisi.",
+      })
+      .optional(),
+    gender: z
+      .enum(["L", "P"], {
+        required_error: "Jenis kelamin harus dipilih.",
+      })
+      .optional(),
+    registrationNumber: z.string().optional(),
+    email: z.string().optional(),
+    nationality: z
+      .enum(["WNI", "WNA"], {
+        required_error: "Kewarganegaraan harus dipilih.",
+      })
+      .optional(),
+    nik: z.string().optional(),
+    nkk: z.string().optional(),
+    nisn: z.string().optional(),
+    passport: z.string().optional(),
+    country: z.string().optional(),
+    address: AddressSchema.optional(),
+    domicile: AddressSchema.optional(),
+    domicileSameAsAddress: z.boolean(),
+  })
+  .refine(
+    (data) => {
+      if (data.nationality === "WNI") {
+        return data.nik?.length === 16 && data.nkk?.length === 16;
+      }
+      if (data.nationality === "WNA") {
+        return !!data.passport && !!data.country;
+      }
+      return true;
+    },
+    {
+      message: "Data tidak lengkap sesuai kewarganegaraan yang dipilih",
+    },
+  );

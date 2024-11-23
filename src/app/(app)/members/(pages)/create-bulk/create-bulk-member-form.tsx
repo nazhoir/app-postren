@@ -105,12 +105,13 @@ interface ValidationError {
 
 const ROLES_MAP = {
   "1": "student",
-  "2": "guardian",
+  "2": "employee",
+  "3": "guardian",
 } as const;
 import { parse, format } from "date-fns";
 const ACCEPTED_FILE_TYPES = [".xlsx", ".xls", ".csv"];
 
-export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
+export function CreateBulkMemberForm({ invitedBy }: { invitedBy: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [data, setData] = useState<Data[]>([]);
   const [errors, setErrors] = useState<ValidationError[]>([]);
@@ -162,7 +163,7 @@ export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
         ),
         gender: entry.kelamin,
         address: "",
-        createdBy,
+        invitedBy,
         identity: {
           nationality: entry.kewarganegaraan,
           country: entry.negara!,
@@ -172,7 +173,7 @@ export function CreateBulkMemberForm({ createdBy }: { createdBy: string }) {
         },
       };
     },
-    [createdBy],
+    [invitedBy],
   );
 
   const processExcelFile = async () => {
