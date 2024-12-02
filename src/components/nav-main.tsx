@@ -92,7 +92,7 @@ export function NavMain({
                 <SidebarMenuButton
                   asChild
                   tooltip={item.title}
-                  className={pathname.includes(item.url) ? "bg-accent" : ""}
+                  className={pathname === item.url ? "bg-accent" : ""}
                 >
                   <Link href={item.url}>
                     <item.icon className="h-4 w-4" />

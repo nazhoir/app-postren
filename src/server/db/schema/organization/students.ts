@@ -12,7 +12,7 @@ export const students = createTable(
       .notNull()
       .references(() => users.id)
       .primaryKey(),
-    organizationId: varchar("organization_id", { length: STRING_LENGTHS.ID })
+    organizationId: varchar("org_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => organizations.id),
     nisn: varchar("nisn", { length: STRING_LENGTHS.NIS }).notNull().unique(),

@@ -1,12 +1,29 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 import { db } from "../db";
-import { organizationUsers, users } from "../db/schema";
+import {
+  organizationBillingItems,
+  organizationUsers,
+  userBill,
+  users,
+} from "../db/schema";
 import { EditUserSchema } from "@/schema/user";
 import { type z } from "zod";
 import { addresses } from "../db/schema/address/address";
+import { auth } from "../auth";
 
+// Error Messages Constant
+const ERROR_MESSAGES = {
+  USER_NOT_FOUND: "Pengguna tidak ditemukan",
+  SEARCH_FAILED: "Gagal mencari pengguna",
+  UNAUTHENTICATED: "Tidak terautentikasi",
+  VALIDATION_FAILED: "Validasi gagal",
+  NO_UPDATE_VALUES: "Tidak ada nilai yang diperbarui",
+  UNEXPECTED_ERROR: "Terjadi kesalahan yang tidak terduga",
+};
+
+// Type Definitions
 type User = typeof users.$inferSelect;
 type Address = Omit<
   typeof addresses.$inferSelect,
@@ -39,12 +56,38 @@ type BaseUser = Pick<
   gender?: "L" | "P" | null;
 };
 
+// Interfaces for extended types
 export interface UserProfile extends BaseUser {
   nisn?: string | null;
   address?: Address | null;
   domicile?: Address | null;
 }
 
+interface SearchUserResult {
+  id: string;
+  name: string;
+  email: string;
+  nik: string;
+  registrationNumber: string;
+  username: string;
+}
+
+interface UserBillData {
+  id: string;
+  name: string;
+  bills: Array<
+    typeof userBill.$inferSelect & {
+      item: typeof organizationBillingItems.$inferSelect;
+    }
+  >;
+}
+
+/**
+ * Retrieve user profile within an organization
+ * @param userID - User identifier
+ * @param orgID - Organization identifier
+ * @returns User profile or undefined
+ */
 export const getOrgUserProfile = async (
   userID: string,
   orgID: string,
@@ -135,13 +178,21 @@ export const getOrgUserProfile = async (
   }
 };
 
+/**
+ * Update user profile with validation and transaction support
+ * @param values - User profile update data
+ * @returns Update result or error details
+ */
 export const updateUserProfile = async (
   values: z.infer<typeof EditUserSchema>,
 ) => {
   const validatedFields = EditUserSchema.safeParse(values);
 
   if (!validatedFields.success) {
-    return { error: "Validation failed", details: validatedFields.error };
+    return {
+      error: ERROR_MESSAGES.VALIDATION_FAILED,
+      details: validatedFields.error,
+    };
   }
 
   try {
@@ -215,7 +266,7 @@ export const updateUserProfile = async (
 
       // Check if there are actual values to update
       if (Object.keys(userUpdateData).length === 0) {
-        throw new Error("No values provided for update");
+        throw new Error(ERROR_MESSAGES.NO_UPDATE_VALUES);
       }
 
       // Update user data including address and domicile references
@@ -232,7 +283,7 @@ export const updateUserProfile = async (
         });
 
       if (!updatedUser) {
-        throw new Error("User not found");
+        throw new Error(ERROR_MESSAGES.USER_NOT_FOUND);
       }
 
       return { success: true, data: updatedUser };
@@ -244,6 +295,192 @@ export const updateUserProfile = async (
       return { error: error.message };
     }
 
-    return { error: "An unexpected error occurred", details: error };
+    return {
+      error: ERROR_MESSAGES.UNEXPECTED_ERROR,
+      details: error,
+    };
+  }
+};
+
+/**
+ * Retrieve user profile by ID
+ * @param id - User identifier
+ * @returns User profile or undefined
+ */
+export const getUserProfile = async (id: string) => {
+  try {
+    if (!id || id.trim() === "") {
+      throw new Error(ERROR_MESSAGES.USER_NOT_FOUND);
+    }
+
+    const req = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      columns: {
+        password: false,
+        deletedAt: false,
+      },
+    });
+
+    return req ?? undefined;
+  } catch (error) {
+    console.error(`Error fetching user profile for ID: ${id}`, error);
+
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+
+    return {
+      error: ERROR_MESSAGES.UNEXPECTED_ERROR,
+      details: error,
+    };
+  }
+};
+
+/**
+ * Add a user to a bill
+ * @param userId - User identifier
+ * @param billId - Bill identifier
+ * @returns Bill insertion result
+ */
+export const addUserToBill = async (userId: string, billId: string) => {
+  const session = await auth();
+
+  if (!session) throw new Error(ERROR_MESSAGES.UNAUTHENTICATED);
+
+  try {
+    const bill = await db.query.organizationBillingItems.findFirst({
+      where: eq(organizationBillingItems.id, billId),
+      columns: {
+        amount: true,
+      },
+    });
+
+    if (!bill) throw new Error("Bill with Id not found");
+
+    const req = await db.insert(userBill).values({
+      userId,
+      billId,
+      createdBy: session.user.id,
+      amount: bill.amount,
+    });
+
+    return req;
+  } catch (error) {
+    console.error(
+      `Error adding user to bill - User: ${userId}, Bill: ${billId}`,
+      error,
+    );
+
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+
+    return {
+      error: ERROR_MESSAGES.UNEXPECTED_ERROR,
+      details: error,
+    };
+  }
+};
+
+/**
+ * Search users by name
+ * @param name - Name to search
+ * @returns User matching the name or null
+ */
+export const searchUserByName = async (name: string) => {
+  if (!name || name.trim() === "") {
+    return null;
+  }
+
+  try {
+    const req = await db.query.users.findFirst({
+      where: ilike(users.name, `%${name}%`),
+      columns: {
+        password: false,
+      },
+    });
+
+    return req ?? null;
+  } catch (error) {
+    console.error(`Error searching user by name: ${name}`, error);
+    return null;
+  }
+};
+
+/**
+ * Search user by identity (ID, NIK, or Registration Number)
+ * @param searchTerm - Search term (ID, NIK, or Registration Number)
+ * @returns User matching the search term or null
+ */
+export async function searchUserByIdentity(searchTerm: string) {
+  if (!searchTerm || searchTerm.trim() === "") {
+    return null;
+  }
+
+  try {
+    const result = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        nik: users.nik,
+        registrationNumber: users.registrationNumber,
+        username: users.username,
+      })
+      .from(users)
+      .where(
+        or(
+          eq(users.id, searchTerm),
+          eq(users.nik, searchTerm),
+          eq(users.registrationNumber, searchTerm),
+        ),
+      )
+      .limit(1);
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error(`Error searching user with term: ${searchTerm}`, error);
+    return null;
+  }
+}
+
+/**
+ * Get user bills
+ * @param id - User identifier
+ * @returns User bill data or undefined
+ */
+export const getUserBill = async (
+  id: string,
+): Promise<UserBillData | undefined> => {
+  try {
+    if (!id || id.trim() === "") {
+      throw new Error(ERROR_MESSAGES.USER_NOT_FOUND);
+    }
+
+    const getUser = await db.query.users.findFirst({
+      where: eq(users.id, id),
+    });
+
+    if (!getUser) throw new Error(ERROR_MESSAGES.USER_NOT_FOUND);
+
+    const req = await db.query.userBill.findMany({
+      where: eq(userBill.userId, id),
+      with: {
+        item: true,
+      },
+    });
+
+    if (!req || req.length === 0) return undefined;
+
+    const data: UserBillData = {
+      id: getUser.id,
+      name: getUser.name,
+      bills: req,
+    };
+
+    return data;
+  } catch (error) {
+    console.error(`Error fetching user bills for ID: ${id}`, error);
+    throw new Error(ERROR_MESSAGES.SEARCH_FAILED);
   }
 };

@@ -90,7 +90,7 @@ const ProfileLoadingSkeleton = () => (
 );
 
 const MainContent = ({ data, orgID }: { data: UserProfile; orgID: string }) => (
-  <main className="text-sm flex flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 pb-6 lg:h-[85vh]">
+  <main className="flex flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 pb-6 text-sm lg:h-[85vh]">
     <div className="pt-6 lg:w-full">
       <div className="md:grid md:grid-cols-7">
         <Avatar className="mx-auto h-32 w-32 rounded-lg border md:sticky md:top-8">
@@ -207,7 +207,7 @@ async function ParentProfile({
     name: "",
     username: null,
     email: null,
-    nationality: null,
+    nationality: "WNI",
     country: null,
     nik: null,
     nkk: null,

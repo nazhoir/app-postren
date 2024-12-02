@@ -1,6 +1,8 @@
 export * from "./address/address";
 export * from "./core/base";
 export * from "./core/enums";
+export * from "./finance/billings";
+export * from "./finance/cashflow";
 export * from "./identity/accounts";
 export * from "./identity/cards";
 export * from "./identity/users";
@@ -9,3 +11,4 @@ export * from "./institution/institutions";
 export * from "./organization/employees";
 export * from "./organization/organizations";
 export * from "./organization/students";
+export * from "./saving/saving";

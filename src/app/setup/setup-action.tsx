@@ -65,6 +65,8 @@ export const setupAction = async (
           name: data.nameAdmin,
           email: data.email,
           password: hashedPassword,
+          nationality: "WNI",
+          country: "indonesia",
         })
         .returning({ id: users.id });
 

@@ -29,7 +29,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Icons } from "./icons";
+import { Icons } from "../icons";
 
 const navItems = [
   {
@@ -141,12 +141,12 @@ const navItems = [
             url: "/finance/settings",
           },
           {
-            title: "Transaksi",
+            title: "Arus Kas",
             url: "/finance/payment",
           },
           {
-            title: "Penagihan",
-            url: "/finance/billing",
+            title: "Tagihan",
+            url: "/finance/billings",
           },
           {
             title: "Penggajian",

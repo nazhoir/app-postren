@@ -5,12 +5,12 @@ import { students } from "../organization/students";
 import { institutions } from "./institutions";
 
 export const institutionStudents = createTable(
-  "institution_students",
+  "inst_students",
   {
     studentId: varchar("student_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => students.id),
-    institutionId: varchar("institution_id", { length: STRING_LENGTHS.ID })
+    institutionId: varchar("inst_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => institutions.id),
     nisLocal: varchar("nis_local", { length: STRING_LENGTHS.NIS }).unique(),
@@ -19,9 +19,7 @@ export const institutionStudents = createTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.studentId, table.institutionId] }),
-    nisLocalIdx: index("students_institutions_nis_local_idx").on(
-      table.nisLocal,
-    ),
+    nisLocalIdx: index("students_insts_nis_local_idx").on(table.nisLocal),
   }),
 );
 

@@ -1,5 +1,6 @@
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -20,40 +21,6 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 export default function Page() {
-  const data = [
-    {
-      id: "ansdkasdnkaj-nasdakls-klwjlwk",
-      type: "Pondok Pesantren",
-      name: "Nurul Jadid Sejati",
-      shortname: "ppnjs",
-      statistc: "13534423234",
-      statistcType: "NSPP",
-    },
-    {
-      id: "ansdkasdnkaj-nasdakls-kfwjlwk",
-      type: "Madrasah Aliyah",
-      name: "Nurul Jadid Sejati",
-      shortname: "manjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-    {
-      id: "ansdkasdqkaj-nasdakls-kfwjlwk",
-      type: "Madrasah Diniyah Takmiliyah Awaliyah",
-      name: "Nurul Jadid Sejati",
-      shortname: "mdtanjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-    {
-      id: "ansdkasdqkaj-nasdakls-kfwjllk",
-      type: "Madrasah Diniyah Takmiliyah Wustha",
-      name: "Nurul Jadid Sejati",
-      shortname: "mdtwnjs",
-      statistc: "13534423234",
-      statistcType: "NSM",
-    },
-  ];
   return (
     <div className="h-fit overflow-auto">
       <header className="flex h-16 shrink-0 items-center gap-2">
@@ -69,32 +36,29 @@ export default function Page() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Penagihan</BreadcrumbPage>
+                <BreadcrumbPage>Arus Kas</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <Button className="ml-auto mr-4" asChild>
-          <Link href={"/finance/add"}>
+        <div className="ml-auto mr-4 flex space-x-2">
+          <Button size={"sm"}>
             <Plus className="h-4 w-4" />
             <span className="ml-1">Tambah</span>
-          </Link>
-        </Button>
+          </Button>
+        </div>
       </header>
       <main className="flex h-[88vh] flex-1 flex-col gap-4 overflow-auto rounded-b-lg border-t px-4 py-6 lg:h-[85vh]">
         <div className="grid gap-4 md:grid-cols-2">
-          {data.map((institution) => (
-            <Card key={institution.id}>
-              <CardHeader>
-                <CardTitle>
-                  {institution.type} {institution.name}
-                </CardTitle>
-                <CardDescription>
-                  {institution.statistcType}: {institution.statistc}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+          <Card>
+            <CardHeader>
+              <CardTitle>Arus Kas</CardTitle>
+              {/* <CardDescription>
+                    Untuk pencatatan kas masuk dan keluar
+                  </CardDescription> */}
+            </CardHeader>
+            <CardContent className="space-x-4"></CardContent>
+          </Card>
         </div>
       </main>
     </div>

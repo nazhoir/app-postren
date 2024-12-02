@@ -17,91 +17,93 @@ import {
 import { students } from "../organization/students";
 import { employees } from "../organization/employees";
 import { addresses } from "../address/address";
+import { userBill, userBillPayments } from "../finance/billings";
+import { savings } from "../saving/saving";
 
 export const users = createTable(
   "user",
   {
-    // Primary identifier
+    // Identifier utama
     id: varchar("id", { length: STRING_LENGTHS.ID })
       .notNull()
       .primaryKey()
       .$defaultFn(() => nanoid()),
-
-    // Basic information
+    // Informasi dasar
     name: varchar("name", { length: STRING_LENGTHS.NAME }).notNull(),
     username: varchar("username", { length: STRING_LENGTHS.USERNAME })
       .unique()
       .$defaultFn(() => nanoid()),
     email: varchar("email", { length: STRING_LENGTHS.EMAIL }).unique(),
-
-    // Identity information
-    nationality: nationality(),
+    // Informasi identitas
+    nationality: nationality().notNull(),
     country: varchar("country", { length: 100 }),
     nik: varchar("nik", { length: STRING_LENGTHS.NIS }).unique(),
     nkk: varchar("nkk", { length: STRING_LENGTHS.NIS }),
     passport: varchar("passport", { length: 50 }).unique(),
-
-    // Personal information
+    // Informasi personal
     birthPlace: varchar("birth_place", { length: STRING_LENGTHS.NAME }),
     birthDate: date("birth_date"),
     gender: gender(),
-
-    // Authentication & security
+    // Autentikasi & keamanan
     emailVerified: timestamp("email_verified", TIMESTAMP_CONFIG),
-    password: varchar("password", { length: STRING_LENGTHS.PASSWORD }),
-
-    // Profile data
+    password: varchar("password", {
+      length: STRING_LENGTHS.PASSWORD,
+    }), // Hash password
+    // Data profil
     image: varchar("image", { length: STRING_LENGTHS.URL }),
     registrationNumber: varchar("registration_number", {
       length: 100,
     }).unique(),
     invitedBy: varchar("invited_by", { length: STRING_LENGTHS.ID }),
-
-    // Family relations
+    // Relasi keluarga
     fatherId: varchar("father_id", { length: STRING_LENGTHS.ID }),
     motherId: varchar("mother_id", { length: STRING_LENGTHS.ID }),
     guardianId: varchar("guardian_id", { length: STRING_LENGTHS.ID }),
     guardianType: guardianType(),
-
-    // Address references
+    // Referensi alamat
     addressId: varchar("address_id", { length: STRING_LENGTHS.ID }),
     domicileSameAsAddress: boolean("domicile_same_as_address"),
-    domicileId: varchar("domicile_id", { length: STRING_LENGTHS.ID }), // Fixed space in column name
+    domicileId: varchar("domicile_id", { length: STRING_LENGTHS.ID }),
+    // Status akun
+    isActive: boolean("is_active").notNull().default(true),
+    lastLogin: timestamp("last_login", TIMESTAMP_CONFIG),
 
     ...baseColumns,
   },
   (table) => ({
-    // Optimize indexes for common queries
+    // Indeks untuk optimasi query
     emailIdx: index("user_email_idx").on(table.email),
     usernameIdx: index("user_username_idx").on(table.username),
     nikIdx: index("user_nik_idx").on(table.nik),
     fatherIdx: index("user_father_idx").on(table.fatherId),
     motherIdx: index("user_mother_idx").on(table.motherId),
     guardianIdx: index("user_guardian_idx").on(table.guardianId),
+    activeIdx: index("user_active_idx").on(table.isActive),
   }),
 );
 
+// Definisi relasi untuk tabel users
 export const usersRelations = relations(users, ({ many, one }) => ({
-  // Authentication & organization relations
+  // Relasi autentikasi & organisasi
   accounts: many(accounts),
   organizations: many(organizationUsers),
   admins: many(organizationAdmins),
   cardIDs: many(cardID),
 
-  // Role-based relations
+  // Relasi berbasis peran
   student: one(students, {
     references: [students.id],
     fields: [users.id],
   }),
   employees: many(employees),
 
-  // Invitation relation
+  // Relasi undangan
   invitee: one(users, {
     references: [users.id],
     fields: [users.invitedBy],
   }),
 
-  // Family relations
+  // Relasi keluarga
   father: one(users, {
     references: [users.id],
     fields: [users.fatherId],
@@ -120,7 +122,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   }),
   children_by_guardian: many(users),
 
-  // Address relations
+  // Relasi alamat
   domicile: one(addresses, {
     references: [addresses.id],
     fields: [users.domicileId],
@@ -128,5 +130,15 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   address: one(addresses, {
     references: [addresses.id],
     fields: [users.addressId],
+  }),
+
+  // Relasi tagihan
+  bills: many(userBill),
+  billPayment: many(userBillPayments),
+
+  // saving
+  saving: one(savings, {
+    references: [savings.id],
+    fields: [users.id],
   }),
 }));

@@ -11,3 +11,9 @@ export const guardianType = pgEnum("guardian_type", [
   "bibi",
   "orang_tua_asuh",
 ]);
+
+export const cashflowType = pgEnum("cashflow_type", ["credit", "debit"]);
+export const billingItemStatus = pgEnum("billing_item_status", [
+  "active",
+  "inactive",
+]);

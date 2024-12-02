@@ -18,7 +18,7 @@ export const institutions = createTable(
     }).unique(),
     image: varchar("image", { length: STRING_LENGTHS.URL }),
     type: varchar("type", { length: STRING_LENGTHS.TYPE }),
-    organizationId: varchar("organization_id", { length: STRING_LENGTHS.ID })
+    organizationId: varchar("org_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => organizations.id),
     statistic: text("statistic"),
@@ -26,9 +26,9 @@ export const institutions = createTable(
     ...baseColumns,
   },
   (table) => ({
-    nameIdx: index("institution_name_idx").on(table.name),
-    shortnameIdx: index("institution_shortname_idx").on(table.shortname),
-    orgIdx: index("institution_org_idx").on(table.organizationId),
+    nameIdx: index("inst_name_idx").on(table.name),
+    shortnameIdx: index("inst_shortname_idx").on(table.shortname),
+    orgIdx: index("inst_org_idx").on(table.organizationId),
   }),
 );
 

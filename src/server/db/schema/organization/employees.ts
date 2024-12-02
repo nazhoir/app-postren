@@ -32,7 +32,7 @@ export const employees = createTable(
     invitedBy: varchar("created_by", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => users.id),
-    organizationId: varchar("organization_id", { length: STRING_LENGTHS.ID })
+    organizationId: varchar("org_id", { length: STRING_LENGTHS.ID })
       .notNull()
       .references(() => organizations.id),
     joiningDate: date("joining_date"),
@@ -51,7 +51,7 @@ export const employees = createTable(
 );
 
 export const employeeTasks = createTable(
-  "employee_tasks",
+  "emp_tasks",
   {
     id: varchar("id", { length: STRING_LENGTHS.ID })
       .notNull()
