@@ -18,10 +18,12 @@ import { Input } from "@/components/ui/input";
 
 import { createOrgBillItemSchema } from "@/schema/finance";
 import { createOrgBillItem } from "@/server/actions/finances";
+import { useRouter } from "next/navigation";
 
 type FormValues = z.infer<typeof createOrgBillItemSchema>;
 
 export function CreateBillItemForm({ userId }: { userId: string }) {
+  const router = useRouter()
   const defaultValues: Partial<FormValues> = {
     name: "",
     createdBy: userId,
@@ -36,6 +38,7 @@ export function CreateBillItemForm({ userId }: { userId: string }) {
   async function onSubmit(data: FormValues) {
     await createOrgBillItem(data);
     toast("Created");
+    router.refresh()
   }
 
   return (

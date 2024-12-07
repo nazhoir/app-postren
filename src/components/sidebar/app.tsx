@@ -82,6 +82,10 @@ const navItems = [
             title: "Kartu ID",
             url: "/members/card",
           },
+          {
+            title: "Akun",
+            url: "/members/account",
+          },
         ],
       },
       {
@@ -89,10 +93,7 @@ const navItems = [
         url: "/students",
         icon: GraduationCap,
         items: [
-          {
-            title: "Tambah",
-            url: "/students/add",
-          },
+          
           {
             title: "Mutasi",
             url: "/students/mutation",
@@ -101,10 +102,6 @@ const navItems = [
             title: "Alumni",
             url: "/students/alumni",
           },
-          {
-            title: "Akun",
-            url: "/students/account",
-          },
         ],
       },
       {
@@ -112,17 +109,10 @@ const navItems = [
         url: "/employees",
         icon: BriefcaseBusiness,
         items: [
-          {
-            title: "Tambah",
-            url: "/gtk/add",
-          },
+          
           {
             title: "Mutasi",
             url: "/gtk/mutation",
-          },
-          {
-            title: "Akun",
-            url: "/gtk/account",
           },
         ],
       },

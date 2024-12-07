@@ -1,3 +1,4 @@
+import { cashflowType, paymentMethod } from "@/server/db/schema";
 import { z } from "zod";
 
 export const RegistrationUserSavingSchema = z.object({
@@ -6,10 +7,13 @@ export const RegistrationUserSavingSchema = z.object({
   balance: z.string().min(6),
 });
 
-export const TransactionUserSavingAccountSchema = z.object({
+export const CashflowSavingAccountSchema = z.object({
   userId: z.string(),
-  name: z.string(),
-  type: z.enum(["credit", "debit"]),
+  name: z.string().max(32),
+  type: z.enum(cashflowType.enumValues),
   amount: z.string(),
   createdBy: z.string(),
+  note: z.string().max(46),
+  paymentMethod: z.enum(paymentMethod.enumValues),
+  paymentNote: z.string().max(46),
 });

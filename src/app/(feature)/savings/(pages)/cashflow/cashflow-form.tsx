@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { TransactionUserSavingAccountSchema } from "@/schema/saving";
+import { CashflowSavingAccountSchema } from "@/schema/saving";
 import { transactionUserSavingAccount } from "@/server/actions/saving";
 import {
   ThermalPrintButton,
@@ -26,7 +26,7 @@ import {
 } from "@/components/print-thermal";
 import { printContent, type PrintProps } from "./print";
 
-type FormValues = z.infer<typeof TransactionUserSavingAccountSchema>;
+type FormValues = z.infer<typeof CashflowSavingAccountSchema>;
 
 export function SavingCashflowForm({
   createdBy,
@@ -52,10 +52,13 @@ export function SavingCashflowForm({
     amount: "",
     type, // Changed to debit for withdrawal
     name,
+    paymentMethod:"cash",
+    note:"",
+    paymentNote:""
   };
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(TransactionUserSavingAccountSchema),
+    resolver: zodResolver(CashflowSavingAccountSchema),
     defaultValues,
   });
 

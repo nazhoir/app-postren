@@ -1,13 +1,14 @@
 "use server";
 import {
   RegistrationUserSavingSchema,
-  TransactionUserSavingAccountSchema,
+  CashflowSavingAccountSchema,
 } from "@/schema/saving";
 import { type z } from "zod";
 import { db } from "../db";
 import { and, eq, gte } from "drizzle-orm";
 import { users } from "../db/schema";
 import { savingCashflow, savings } from "../db/schema/saving/saving";
+import { getOrgsIdByUserId } from "./organizations";
 
 // Custom error class for saving account operations
 class SavingAccountError extends Error {
@@ -100,6 +101,17 @@ export const registrationUserSavingAccount = async (
       };
     }
 
+    const orgId = await getOrgsIdByUserId(user.id);
+    if (!orgId) {
+      return {
+        success: false,
+        error: {
+          code: ERROR_CODES.USER_NOT_FOUND,
+          message: "User not found with the provided NIK",
+        },
+      };
+    }
+
     let savingAccountId: string | undefined;
 
     // Use transaction to ensure data consistency
@@ -111,6 +123,7 @@ export const registrationUserSavingAccount = async (
           createdBy,
           balance,
           userId: user.id,
+          orgId: orgId,
         })
         .returning({
           id: savings.id,
@@ -159,10 +172,10 @@ export const registrationUserSavingAccount = async (
  * @returns Operation result of the transaction
  */
 export const transactionUserSavingAccount = async (
-  values: z.infer<typeof TransactionUserSavingAccountSchema>,
+  values: z.infer<typeof CashflowSavingAccountSchema>,
 ) => {
   // Validate input
-  const validatedFields = TransactionUserSavingAccountSchema.safeParse(values);
+  const validatedFields = CashflowSavingAccountSchema.safeParse(values);
 
   if (!validatedFields.success) {
     return {
@@ -175,7 +188,7 @@ export const transactionUserSavingAccount = async (
     };
   }
 
-  const { createdBy, userId, amount, type, name } = validatedFields.data;
+  const { createdBy, userId, amount, type, name , paymentMethod, paymentNote, note} = validatedFields.data;
 
   try {
     const admin = await db.query.users.findFirst({
@@ -316,6 +329,7 @@ export const transactionUserSavingAccount = async (
           amount,
           type,
           name,
+          paymentMethod, paymentNote, note
         })
         .returning({
           id: savingCashflow.id,
@@ -467,7 +481,6 @@ export const getUserSavingAccountInfo = async (userId: string) => {
       todayCashflow,
       cashflow,
     };
-    console.log(result);
     return result;
   } catch (error) {
     console.error(`Error fetching saving account for user ${userId}:`, error);
@@ -476,6 +489,56 @@ export const getUserSavingAccountInfo = async (userId: string) => {
       ERROR_CODES.SAVING_ACCOUNT_NOT_FOUND,
       "Failed to retrieve saving account information",
       error instanceof Error ? { message: error.message } : undefined,
+    );
+  }
+};
+
+export const getOrgSavingCashflowReport = async (orgId: string) => {
+  try {
+    const req = await db.query.savings.findMany({
+      where: eq(savings.orgId, orgId),
+      columns: {},
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+        cashflow: true,
+      },
+    });
+
+    const result = req.flatMap(({ cashflow, user }) =>
+      cashflow.map((casflow) => ({
+        ...casflow,
+        user,
+      })),
+    );
+
+    return result;
+  } catch (error) {
+    // Log the full error for internal debugging
+    console.error(
+      `Error fetching saving cashflow report for organization ${orgId}:`,
+      error,
+    );
+
+    // Throw a structured error with detailed information
+    throw new SavingAccountError(
+      ERROR_CODES.SAVING_ACCOUNT_NOT_FOUND,
+      "Failed to retrieve saving cashflow report information",
+      {
+        orgId,
+        errorDetails:
+          error instanceof Error
+            ? {
+                message: error.message,
+                name: error.name,
+                stack: error.stack,
+              }
+            : { message: "Unknown error occurred" },
+      },
     );
   }
 };

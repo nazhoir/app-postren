@@ -7,7 +7,7 @@ import {
   STRING_LENGTHS,
   TIMESTAMP_CONFIG,
 } from "../core/base";
-import { gender, guardianType, nationality } from "../core/enums";
+import { familyRelationType, gender, nationality } from "../core/enums";
 import { accounts } from "./accounts";
 import { cardID } from "./cards";
 import {
@@ -18,7 +18,7 @@ import { students } from "../organization/students";
 import { employees } from "../organization/employees";
 import { addresses } from "../address/address";
 import { userBill, userBillPayments } from "../finance/billings";
-import { savings } from "../saving/saving";
+import { savingCashflow, savings } from "../saving/saving";
 
 export const users = createTable(
   "user",
@@ -55,11 +55,6 @@ export const users = createTable(
       length: 100,
     }).unique(),
     invitedBy: varchar("invited_by", { length: STRING_LENGTHS.ID }),
-    // Relasi keluarga
-    fatherId: varchar("father_id", { length: STRING_LENGTHS.ID }),
-    motherId: varchar("mother_id", { length: STRING_LENGTHS.ID }),
-    guardianId: varchar("guardian_id", { length: STRING_LENGTHS.ID }),
-    guardianType: guardianType(),
     // Referensi alamat
     addressId: varchar("address_id", { length: STRING_LENGTHS.ID }),
     domicileSameAsAddress: boolean("domicile_same_as_address"),
@@ -75,14 +70,41 @@ export const users = createTable(
     emailIdx: index("user_email_idx").on(table.email),
     usernameIdx: index("user_username_idx").on(table.username),
     nikIdx: index("user_nik_idx").on(table.nik),
-    fatherIdx: index("user_father_idx").on(table.fatherId),
-    motherIdx: index("user_mother_idx").on(table.motherId),
-    guardianIdx: index("user_guardian_idx").on(table.guardianId),
     activeIdx: index("user_active_idx").on(table.isActive),
   }),
 );
 
-// Definisi relasi untuk tabel users
+// Tabel baru untuk hubungan keluarga
+export const userFamily = createTable(
+  "user_family",
+  {
+    id: varchar("id", { length: STRING_LENGTHS.ID })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    userId: varchar("user_id", { length: STRING_LENGTHS.ID })
+      .references(() => users.id)
+      .notNull(),
+    relatedUserId: varchar("related_user_id", { length: STRING_LENGTHS.ID })
+      .references(() => users.id)
+      .notNull(),
+    relationType: familyRelationType("relation_type").notNull(),
+    isGuardian: boolean("is_guardian").default(false),
+
+    ...baseColumns,
+  },
+  (table) => ({
+    // Indeks untuk optimasi query
+    userIdx: index("user_family_user_idx").on(table.userId),
+    relatedUserIdx: index("user_family_related_user_idx").on(
+      table.relatedUserId,
+    ),
+    relationTypeIdx: index("user_family_relation_type_idx").on(
+      table.relationType,
+    ),
+  }),
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   // Relasi autentikasi & organisasi
   accounts: many(accounts),
@@ -94,6 +116,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   student: one(students, {
     references: [students.id],
     fields: [users.id],
+    relationName: "student",
   }),
   employees: many(employees),
 
@@ -101,35 +124,28 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   invitee: one(users, {
     references: [users.id],
     fields: [users.invitedBy],
+    relationName: "invitee",
   }),
 
   // Relasi keluarga
-  father: one(users, {
-    references: [users.id],
-    fields: [users.fatherId],
+  familyRelations: many(userFamily, {
+    relationName: "relatedUser",
   }),
-  children_by_father: many(users),
 
-  mother: one(users, {
-    references: [users.id],
-    fields: [users.motherId],
+  familyRelationsUser: many(userFamily, {
+    relationName: "userFamily_main",
   }),
-  children_by_mother: many(users),
-
-  guardian: one(users, {
-    references: [users.id],
-    fields: [users.guardianId],
-  }),
-  children_by_guardian: many(users),
 
   // Relasi alamat
   domicile: one(addresses, {
     references: [addresses.id],
     fields: [users.domicileId],
+    relationName: "domicile",
   }),
   address: one(addresses, {
     references: [addresses.id],
     fields: [users.addressId],
+    relationName: "address",
   }),
 
   // Relasi tagihan
@@ -140,5 +156,23 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   saving: one(savings, {
     references: [savings.id],
     fields: [users.id],
+    relationName: "saving",
+  }),
+
+  savingCashflowCreated: many(savingCashflow),
+}));
+
+
+// Definisi relasi untuk tabel user_family
+export const userFamilyRelations = relations(userFamily, ({ one }) => ({
+  user: one(users, {
+    references: [users.id],
+    fields: [userFamily.userId],
+    relationName: "userFamily_main",
+  }),
+  relatedUser: one(users, {
+    references: [users.id],
+    fields: [userFamily.relatedUserId],
+    relationName: "relatedUser",
   }),
 }));

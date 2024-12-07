@@ -3,13 +3,16 @@
 import { and, eq, ilike, or } from "drizzle-orm";
 import { db } from "../db";
 import {
+  familyRelationType,
   organizationBillingItems,
   organizationUsers,
   userBill,
+  userFamily,
+  userFamilyRelations,
   users,
 } from "../db/schema";
-import { EditUserSchema } from "@/schema/user";
-import { type z } from "zod";
+import { createUserFamilyRelationSchema, EditUserSchema } from "@/schema/user";
+import { z } from "zod";
 import { addresses } from "../db/schema/address/address";
 import { auth } from "../auth";
 
@@ -29,6 +32,7 @@ type Address = Omit<
   typeof addresses.$inferSelect,
   "createdAt" | "updatedAt" | "deletedAt"
 >;
+type UserFamily = typeof userFamily.$inferSelect;
 
 // Simplified type definitions
 type BaseUser = Pick<
@@ -47,10 +51,6 @@ type BaseUser = Pick<
   | "email"
   | "passport"
   | "image"
-  | "guardianType"
-  | "fatherId"
-  | "motherId"
-  | "guardianId"
   | "domicileSameAsAddress"
 > & {
   gender?: "L" | "P" | null;
@@ -61,6 +61,7 @@ export interface UserProfile extends BaseUser {
   nisn?: string | null;
   address?: Address | null;
   domicile?: Address | null;
+  familyRelations?: UserFamily[] | null;
 }
 
 interface SearchUserResult {
@@ -115,14 +116,23 @@ export const getOrgUserProfile = async (
             email: true,
             passport: true,
             image: true,
-            guardianType: true,
-            fatherId: true,
-            motherId: true,
-            guardianId: true,
+
             gender: true,
             domicileSameAsAddress: true,
           },
           with: {
+            familyRelations: {
+              with: {
+                relatedUser: true,
+                user: true,
+              },
+            },
+            familyRelationsUser: {
+              with: {
+                relatedUser: true,
+                user: true,
+              },
+            },
             student: {
               columns: {
                 nisn: true,
@@ -163,14 +173,17 @@ export const getOrgUserProfile = async (
 
     if (!data?.user) return undefined;
 
-    const { student, address, domicile, ...userBase } = data.user;
+    const { student, address, domicile, familyRelations, ...userBase } =
+      data.user;
 
     const userProfile: UserProfile = {
       ...userBase,
       nisn: student?.nisn ?? null,
       address: address ?? null,
       domicile: domicile ?? null,
+      familyRelations: familyRelations ?? null,
     };
+
     return userProfile;
   } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -321,18 +334,11 @@ export const getUserProfile = async (id: string) => {
       },
     });
 
-    return req ?? undefined;
+    return req;
   } catch (error) {
     console.error(`Error fetching user profile for ID: ${id}`, error);
 
-    if (error instanceof Error) {
-      return { error: error.message };
-    }
-
-    return {
-      error: ERROR_MESSAGES.UNEXPECTED_ERROR,
-      details: error,
-    };
+    throw new Error("Failed to retrieve user information");
   }
 };
 
@@ -482,5 +488,68 @@ export const getUserBill = async (
   } catch (error) {
     console.error(`Error fetching user bills for ID: ${id}`, error);
     throw new Error(ERROR_MESSAGES.SEARCH_FAILED);
+  }
+};
+
+export const createUserFamilyRelation = async (
+  values: z.infer<typeof createUserFamilyRelationSchema>,
+) => {
+  const validatedFields = createUserFamilyRelationSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      error: ERROR_MESSAGES.VALIDATION_FAILED,
+      details: validatedFields.error.format(),
+    };
+  }
+
+  const { userId, relatedUserId, relationType } = validatedFields.data;
+  try {
+    await db.transaction(async (tx) => {
+      // Masukkan relasi keluarga utama
+      await tx.insert(userFamily).values({
+        userId,
+        relatedUserId,
+        relationType,
+      });
+
+      // Tambahkan relasi timbal balik untuk tipe keluarga tertentu
+      const parentalTypes = ["father", "mother", "guardian"];
+      if (parentalTypes.includes(relationType)) {
+        // Tambahkan relasi anak untuk orang tua/wali
+        await tx.insert(userFamily).values({
+          userId: relatedUserId,
+          relatedUserId: userId,
+          relationType: "child",
+        });
+      } else if (relationType === "sibling") {
+        // Untuk saudara, tambahkan relasi timbal balik
+        await tx.insert(userFamily).values({
+          userId: relatedUserId,
+          relatedUserId: userId,
+          relationType: "sibling",
+        });
+      } else if (relationType === "spouse") {
+        // Tambahan: untuk pasangan, bisa ditambahkan logika khusus jika diperlukan
+        await tx.insert(userFamily).values({
+          userId: relatedUserId,
+          relatedUserId: userId,
+          relationType: "spouse",
+        });
+      }
+    });
+
+    return {
+      success: true,
+      message: "Relasi keluarga berhasil ditambahkan",
+    };
+  } catch (error) {
+    console.error("Gagal menambahkan relasi keluarga:", error);
+    
+    return {
+      success: false,
+      error: "ERROR_MESSAGES.TRANSACTION_FAILED",
+      details: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 };

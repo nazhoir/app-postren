@@ -1,4 +1,4 @@
-import { getOrgUserProfile, type UserProfile } from "@/server/actions/users";
+import { getOrgUserProfile, getUserProfile, type UserProfile } from "@/server/actions/users";
 import { notFound, redirect } from "next/navigation";
 import React, { Suspense } from "react";
 import {
@@ -106,17 +106,7 @@ const MainContent = ({ data, orgID }: { data: UserProfile; orgID: string }) => (
 );
 
 const UserDetails = ({ data, orgID }: { data: UserProfile; orgID: string }) => {
-  const getGuardianType = () => {
-    if (!data.guardianId) return undefined;
-
-    if (data.guardianId === data.fatherId) {
-      return "AYAH";
-    }
-    if (data.guardianId === data.motherId) {
-      return "IBU";
-    }
-    return data.guardianType?.replaceAll("_", " ");
-  };
+ 
   return (
     <div className="mt-4 md:col-span-6 md:mt-0 md:px-2">
       <h1 className="mb-8 text-center text-2xl font-bold md:mb-4 md:text-left">
@@ -148,7 +138,7 @@ const UserDetails = ({ data, orgID }: { data: UserProfile; orgID: string }) => {
       <DetailRow label="Kewarganegaraan" value={data.nationality} />
       <DetailRow label="Negara" value={data.country} />
       <EmailDetails email={data.email} emailVerified={data.emailVerified} />
-
+      {/* {data.nkk && <DetailRow label="Wali" value={getGuardianType()} />} */}
       <div className="mt-4">
         <h2 className="font-bold">Alamat</h2>
         <DetailRow label="Alamat lengkap" value={data.address?.fullAddress} />
@@ -160,32 +150,27 @@ const UserDetails = ({ data, orgID }: { data: UserProfile; orgID: string }) => {
         <DetailRow label="Provinsi" value={data.address?.province} />
         <DetailRow label="Kode pos" value={data.address?.postalCode} />
       </div>
-      {data.nisn ? (
+      {data.familyRelations ? (
         <>
-          <DetailRow label="Wali" value={getGuardianType()} />
           <div className="mt-4 grid gap-8 border-t py-4 md:mt-8">
-            <Suspense fallback={<Skeleton className="h-20 w-full" />}>
-              <ParentProfile
-                label="AYAH KANDUNG"
-                userID={data.fatherId!}
-                orgID={orgID}
-              />
-            </Suspense>
-            <Suspense fallback={<Skeleton className="h-20 w-full" />}>
-              <ParentProfile
-                label="IBU KANDUNG"
-                userID={data.motherId!}
-                orgID={orgID}
-              />
-            </Suspense>
+          {data.familyRelations.map(({relatedUserId, relationType, userId}, idx)=>(
 
-            {data.guardianType ? (
+            <Suspense key={idx} fallback={<Skeleton className="h-20 w-full" />}>
+              <ParentProfile
+                label={relationType}
+                userID={userId}
+                orgID={orgID}
+              />
+            </Suspense>
+          ))}
+            
+            {/* {data.guardianType ? (
               <ParentProfile
                 label={"WALI"}
                 userID={data.guardianId!}
                 orgID={orgID}
               />
-            ) : null}
+            ) : null} */}
           </div>
         </>
       ) : null}
@@ -202,45 +187,24 @@ async function ParentProfile({
   userID: string;
   orgID: string;
 }) {
-  let data: UserProfile = {
-    id: "",
-    name: "",
-    username: null,
-    email: null,
-    nationality: "WNI",
-    country: null,
-    nik: null,
-    nkk: null,
-    passport: null,
-    birthPlace: null,
-    birthDate: null,
-    gender: null,
-    emailVerified: null,
-    image: null,
-    registrationNumber: null,
-    fatherId: null,
-    motherId: null,
-    guardianId: null,
-    guardianType: null,
-    domicileSameAsAddress: null,
-  };
-  const req = await getOrgUserProfile(userID, orgID);
+  const req = await getUserProfile(userID);
 
-  if (req) data = req;
+  if (!req) return null;
+
   return (
     <div>
       <h2 className="text-center text-lg font-bold md:mb-0 md:text-left">
         {label}
       </h2>
-      <DetailRow label="Nama" value={data.name} />
-      <DetailRow label="NIK" value={data.nik} />
-      <DetailRow label="NKK" value={data.nkk} />
-      <DetailRow label="Tempat lahir" value={data.birthPlace} />
+      <DetailRow label="Nama" value={req.name ?? "-"} />
+      <DetailRow label="NIK" value={req.nik ?? "-"} />
+      <DetailRow label="NKK" value={req.nkk ?? "-"} />
+      <DetailRow label="Tempat lahir" value={req.birthPlace ?? "-"} />
       <DetailRow
         label="Tanggal lahir"
         value={
-          data.birthDate
-            ? format(new Date(data.birthDate), "dd MMMM yyyy", { locale: IDN })
+          req.birthDate
+            ? format(new Date(req.birthDate), "dd MMMM yyyy", { locale: IDN })
             : "-"
         }
       />

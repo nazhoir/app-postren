@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AddressSchema } from "./address";
+import { familyRelationType, gender, nationality } from "@/server/db/schema";
 
 export const CreateUserSchema = z.object({
   name: z
@@ -124,14 +125,14 @@ export const EditUserSchema = z
       })
       .optional(),
     gender: z
-      .enum(["L", "P"], {
+      .enum(gender.enumValues, {
         required_error: "Jenis kelamin harus dipilih.",
       })
       .optional(),
     registrationNumber: z.string().optional(),
     email: z.string().optional(),
     nationality: z
-      .enum(["WNI", "WNA"], {
+      .enum(nationality.enumValues, {
         required_error: "Kewarganegaraan harus dipilih.",
       })
       .optional(),
@@ -158,3 +159,10 @@ export const EditUserSchema = z
       message: "Data tidak lengkap sesuai kewarganegaraan yang dipilih",
     },
   );
+
+
+  export const createUserFamilyRelationSchema = z.object({
+    userId:z.string(),
+    relatedUserId:z.string(),
+    relationType:z.enum(familyRelationType.enumValues)
+  })

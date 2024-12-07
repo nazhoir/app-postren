@@ -1,3 +1,4 @@
+import { RealtimeDistance } from "@/components/realtime-distance";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -38,7 +39,7 @@ export function CashflowData({ data }: { data?: Data[] }) {
             >
               {type}
             </Badge>{" "}
-            <span className="w-24">{createdAt.toLocaleDateString()}</span>
+            <RealtimeDistance className="w-24" date={createdAt} />
             <span>{name}</span>{" "}
             <span className="ml-auto">{formatCurrency(Number(amount))}</span>
           </CardDescription>

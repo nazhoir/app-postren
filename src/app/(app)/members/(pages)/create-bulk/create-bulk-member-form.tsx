@@ -109,6 +109,7 @@ const ROLES_MAP = {
   "3": "guardian",
 } as const;
 import { parse, format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 const ACCEPTED_FILE_TYPES = [".xlsx", ".xls", ".csv"];
 
 export function CreateBulkMemberForm({ invitedBy }: { invitedBy: string }) {
@@ -305,7 +306,7 @@ export function CreateBulkMemberForm({ invitedBy }: { invitedBy: string }) {
       <CardHeader>
         <div className="flex items-center gap-2">
           <FileSpreadsheet className="h-6 w-6 text-primary" />
-          <CardTitle>Excel Parser dengan Validasi</CardTitle>
+          <CardTitle>Tambah Masal Anggota</CardTitle>
         </div>
         <CardDescription>
           Unggah file Excel (.xlsx, .xls) atau CSV untuk memproses data anggota
@@ -333,6 +334,7 @@ export function CreateBulkMemberForm({ invitedBy }: { invitedBy: string }) {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
         >
           <input
             ref={fileInputRef}
@@ -345,7 +347,6 @@ export function CreateBulkMemberForm({ invitedBy }: { invitedBy: string }) {
             <Upload className="h-8 w-8 text-gray-400" />
             <div className="text-sm text-gray-600">
               <button
-                onClick={() => fileInputRef.current?.click()}
                 className="text-primary hover:underline"
                 disabled={isLoading}
                 type="button"
@@ -423,7 +424,7 @@ export function CreateBulkMemberForm({ invitedBy }: { invitedBy: string }) {
             <div className="mt-2 space-y-1">
               {data.map((item, idx) => (
                 <div key={idx} className="text-sm">
-                  {item.name} - {item.role}
+                 <Badge variant={"outline"}>{item.role === "guardian"  ? "Siswa" : item.role === "employee" ?"Pegawai": "Orang Tua"}</Badge> {item.name} 
                 </div>
               ))}
             </div>

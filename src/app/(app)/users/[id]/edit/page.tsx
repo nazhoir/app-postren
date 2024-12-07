@@ -21,8 +21,6 @@ export default async function Page({
   const data = await getOrgUserProfile(id, orgID);
   if (!data) return notFound();
   return (
-    <div className="p-4">
-      <EditUserForm data={data} />
-    </div>
+    <EditUserForm data={data} />
   );
 }

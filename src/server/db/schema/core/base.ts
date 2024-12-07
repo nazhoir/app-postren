@@ -1,17 +1,17 @@
 import { pgTableCreator, timestamp } from "drizzle-orm/pg-core";
 
 // Konstanta untuk timestamp columns
-export const TIMESTAMP_CONFIG = { mode: "date", precision: 3 } as const;
+export const TIMESTAMP_CONFIG = {
+  mode: "date",
+  precision: 6,
+  withTimezone: true,
+} as const;
 
 // Optimize timestamp columns
 export const baseColumns = {
-  createdAt: timestamp("created_at", TIMESTAMP_CONFIG)
-    .$default(
-      () => new Date(new Date().toISOString().slice(0, 19).replace("T", " ")),
-    )
-    .notNull(),
+  createdAt: timestamp("created_at", TIMESTAMP_CONFIG).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", TIMESTAMP_CONFIG).$onUpdate(
-    () => new Date(new Date().toISOString().slice(0, 19).replace("T", " ")),
+    () => new Date(),
   ),
   deletedAt: timestamp("deleted_at", TIMESTAMP_CONFIG),
 };
