@@ -38,7 +38,6 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem asChild>
           <Link href={`/savings/cashflow/${data.id}`}>Detail</Link>
         </DropdownMenuItem>
-       
       </DropdownMenuContent>
     </DropdownMenu>
   );

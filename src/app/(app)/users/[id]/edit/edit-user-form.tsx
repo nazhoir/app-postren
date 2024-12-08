@@ -29,6 +29,7 @@ import { Switch } from "@/components/ui/switch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import isEqual from "lodash/isEqual";
 import cloneDeep from "lodash/cloneDeep";
+import { EditUserPicture } from "./edit-user-picture";
 type FormValues = z.infer<typeof EditUserSchema>;
 
 interface EditUserFormProps {
@@ -206,401 +207,254 @@ export default function EditUserForm({ data }: EditUserFormProps) {
   }, [form, initialValues]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <div className="lg: gap-4 space-y-4 lg:grid lg:grid-cols-4 lg:space-y-0">
-          <h2 className="text-lg font-bold lg:col-span-4">Data Pribadi</h2>
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="lg:col-span-2">
-                <FormLabel>Nama lengkap</FormLabel>
-                <FormControl>
-                  <Input placeholder="Masukkan nama lengkap" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="registrationNumber"
-            render={({ field }) => (
-              <FormItem className="lg:col-start-1">
-                <FormLabel>Nomor induk</FormLabel>
-                <FormControl>
-                  <Input placeholder="Masukkan Nomor induk" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="gender"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel>Jenis Kelamin</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex space-x-4"
-                  >
-                    <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <RadioGroupItem value="L" />
-                      </FormControl>
-                      <FormLabel className="font-normal">Laki-laki</FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <RadioGroupItem value="P" />
-                      </FormControl>
-                      <FormLabel className="font-normal">Perempuan</FormLabel>
-                    </FormItem>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="birthPlace"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tempat Lahir</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Masukkan tempat lahir"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="birthDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tanggal Lahir</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} value={field.value ?? ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="nisn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>NISN</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Masukkan NISN"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="nationality"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Kewarganegaraan</FormLabel>
-                <Select
-                  onValueChange={handleNationalityChange}
-                  defaultValue={field.value}
-                >
+    <>
+      <EditUserPicture data={data} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+          <div className="lg: gap-4 space-y-4 lg:grid lg:grid-cols-4 lg:space-y-0">
+            <h2 className="text-lg font-bold lg:col-span-4">Data Pribadi</h2>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="lg:col-span-2">
+                  <FormLabel>Nama lengkap</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih kewarganegaraan" />
-                    </SelectTrigger>
+                    <Input placeholder="Masukkan nama lengkap" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="WNI">Indonesia</SelectItem>
-                    <SelectItem value="WNA">Warga Asing</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="registrationNumber"
+              render={({ field }) => (
+                <FormItem className="lg:col-start-1">
+                  <FormLabel>Nomor induk</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Masukkan Nomor induk" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {nationality === "WNI" && (
-            <>
-              <FormField
-                control={form.control}
-                name="nik"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>NIK</FormLabel>
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Jenis Kelamin</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex space-x-4"
+                    >
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <RadioGroupItem value="L" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Laki-laki</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <RadioGroupItem value="P" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Perempuan</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="birthPlace"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tempat Lahir</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Masukkan tempat lahir"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="birthDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tanggal Lahir</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="nisn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>NISN</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Masukkan NISN"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="nationality"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kewarganegaraan</FormLabel>
+                  <Select
+                    onValueChange={handleNationalityChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <Input
-                        placeholder="16 digit NIK"
-                        type="number"
-                        maxLength={16}
-                        {...field}
-                        value={field.value ?? ""}
-                      />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih kewarganegaraan" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="nkk"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nomor KK</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="16 digit Nomor KK"
-                        maxLength={16}
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
+                    <SelectContent>
+                      <SelectItem value="WNI">Indonesia</SelectItem>
+                      <SelectItem value="WNA">Warga Asing</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {nationality === "WNA" && (
-            <>
-              <FormField
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nama Negara</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Masukkan nama negara"
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
-          <FormField
-            control={form.control}
-            name="passport"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nomor Paspor</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Masukkan nomor paspor"
-                    maxLength={50}
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="col-span-2 col-start-1">
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="Masukkan email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="lg: gap-4 space-y-4 lg:grid lg:grid-cols-4 lg:space-y-0">
-          <h2 className="col-span-4 text-lg font-bold">
-            Data Alamat Sesuai KK
-          </h2>
-          <FormField
-            control={form.control}
-            name="address.fullAddress"
-            render={({ field }) => (
-              <FormItem className="col-span-4">
-                <FormLabel>Alamat lengkap</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Masukkan alamat lengkap"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address.rt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>RT</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Masukkan Nomor induk"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address.rw"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>RW</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Masukkan Nomor induk"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address.village"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Desa/Keluruhan</FormLabel>
-                <FormControl>
-                  <Input placeholder="Masukkan Nomor induk" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address.district"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Kecamatan</FormLabel>
-                <FormControl>
-                  <Input placeholder="Masukkan Nomor induk" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address.regency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Kabupaten/Kota</FormLabel>
-                <FormControl>
-                  <Input placeholder="Masukkan Nomor induk" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address.province"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Provinsi</FormLabel>
-                <FormControl>
-                  <Input placeholder="Masukkan Nomor induk" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address.postalCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Kode Pos</FormLabel>
-                <FormControl>
-                  <Input placeholder="Masukkan Nomor induk" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="domicileSameAsAddress"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>
-                  Alamat Domisili{" "}
-                  {form.watch("domicileSameAsAddress").valueOf() === true
-                    ? "Sama dengan KK"
-                    : "Tidak sama dengan KK"}
-                </FormLabel>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+            {nationality === "WNI" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="nik"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>NIK</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="16 digit NIK"
+                          type="number"
+                          maxLength={16}
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+                <FormField
+                  control={form.control}
+                  name="nkk"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nomor KK</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="16 digit Nomor KK"
+                          maxLength={16}
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
-        {form.watch("domicileSameAsAddress").valueOf() === false ? (
+            {nationality === "WNA" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nama Negara</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Masukkan nama negara"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+            <FormField
+              control={form.control}
+              name="passport"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nomor Paspor</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Masukkan nomor paspor"
+                      maxLength={50}
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="col-span-2 col-start-1">
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Masukkan email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div className="lg: gap-4 space-y-4 lg:grid lg:grid-cols-4 lg:space-y-0">
             <h2 className="col-span-4 text-lg font-bold">
-              Data Alamat Domisili
+              Data Alamat Sesuai KK
             </h2>
             <FormField
               control={form.control}
-              name="domicile.fullAddress"
+              name="address.fullAddress"
               render={({ field }) => (
                 <FormItem className="col-span-4">
                   <FormLabel>Alamat lengkap</FormLabel>
@@ -618,7 +472,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
 
             <FormField
               control={form.control}
-              name="domicile.rt"
+              name="address.rt"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>RT</FormLabel>
@@ -636,7 +490,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
 
             <FormField
               control={form.control}
-              name="domicile.rw"
+              name="address.rw"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>RW</FormLabel>
@@ -654,7 +508,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
 
             <FormField
               control={form.control}
-              name="domicile.village"
+              name="address.village"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Desa/Keluruhan</FormLabel>
@@ -668,7 +522,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
 
             <FormField
               control={form.control}
-              name="domicile.district"
+              name="address.district"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kecamatan</FormLabel>
@@ -682,7 +536,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
 
             <FormField
               control={form.control}
-              name="domicile.regency"
+              name="address.regency"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kabupaten/Kota</FormLabel>
@@ -696,7 +550,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
 
             <FormField
               control={form.control}
-              name="domicile.province"
+              name="address.province"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Provinsi</FormLabel>
@@ -710,7 +564,7 @@ export default function EditUserForm({ data }: EditUserFormProps) {
 
             <FormField
               control={form.control}
-              name="domicile.postalCode"
+              name="address.postalCode"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kode Pos</FormLabel>
@@ -722,24 +576,178 @@ export default function EditUserForm({ data }: EditUserFormProps) {
               )}
             />
           </div>
-        ) : null}
-        <div className="flex gap-4">
-          <Button type="submit" className="w-full" disabled={!isFormChanged}>
-            {isFormChanged ? "Simpan Perubahan" : "Tidak Ada Perubahan"}
-          </Button>
 
-          {isFormChanged && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleReset}
-              className="w-40"
-            >
-              Reset
+          <FormField
+            control={form.control}
+            name="domicileSameAsAddress"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel>
+                    Alamat Domisili{" "}
+                    {form.watch("domicileSameAsAddress")!.valueOf() === true
+                      ? "Sama dengan KK"
+                      : "Tidak sama dengan KK"}
+                  </FormLabel>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {form.watch("domicileSameAsAddress")!.valueOf() === false ? (
+            <div className="lg: gap-4 space-y-4 lg:grid lg:grid-cols-4 lg:space-y-0">
+              <h2 className="col-span-4 text-lg font-bold">
+                Data Alamat Domisili
+              </h2>
+              <FormField
+                control={form.control}
+                name="domicile.fullAddress"
+                render={({ field }) => (
+                  <FormItem className="col-span-4">
+                    <FormLabel>Alamat lengkap</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Masukkan alamat lengkap"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domicile.rt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>RT</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Masukkan Nomor induk"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domicile.rw"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>RW</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Masukkan Nomor induk"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domicile.village"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Desa/Keluruhan</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Masukkan Nomor induk" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domicile.district"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kecamatan</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Masukkan Nomor induk" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domicile.regency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kabupaten/Kota</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Masukkan Nomor induk" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domicile.province"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Provinsi</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Masukkan Nomor induk" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="domicile.postalCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kode Pos</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Masukkan Nomor induk" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          ) : null}
+          <div className="flex gap-4">
+            <Button type="submit" className="w-full" disabled={!isFormChanged}>
+              {isFormChanged ? "Simpan Perubahan" : "Tidak Ada Perubahan"}
             </Button>
-          )}
-        </div>
-      </form>
-    </Form>
+
+            {isFormChanged && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleReset}
+                className="w-40"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }

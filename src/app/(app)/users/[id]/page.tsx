@@ -1,4 +1,8 @@
-import { getOrgUserProfile, getUserProfile, type UserProfile } from "@/server/actions/users";
+import {
+  getOrgUserProfile,
+  getUserProfile,
+  type UserProfile,
+} from "@/server/actions/users";
 import { notFound, redirect } from "next/navigation";
 import React, { Suspense } from "react";
 import {
@@ -106,7 +110,6 @@ const MainContent = ({ data, orgID }: { data: UserProfile; orgID: string }) => (
 );
 
 const UserDetails = ({ data, orgID }: { data: UserProfile; orgID: string }) => {
- 
   return (
     <div className="mt-4 md:col-span-6 md:mt-0 md:px-2">
       <h1 className="mb-8 text-center text-2xl font-bold md:mb-4 md:text-left">
@@ -153,17 +156,21 @@ const UserDetails = ({ data, orgID }: { data: UserProfile; orgID: string }) => {
       {data.familyRelations ? (
         <>
           <div className="mt-4 grid gap-8 border-t py-4 md:mt-8">
-          {data.familyRelations.map(({relatedUserId, relationType, userId}, idx)=>(
+            {data.familyRelations.map(
+              ({ relatedUserId, relationType, userId }, idx) => (
+                <Suspense
+                  key={idx}
+                  fallback={<Skeleton className="h-20 w-full" />}
+                >
+                  <ParentProfile
+                    label={relationType}
+                    userID={userId}
+                    orgID={orgID}
+                  />
+                </Suspense>
+              ),
+            )}
 
-            <Suspense key={idx} fallback={<Skeleton className="h-20 w-full" />}>
-              <ParentProfile
-                label={relationType}
-                userID={userId}
-                orgID={orgID}
-              />
-            </Suspense>
-          ))}
-            
             {/* {data.guardianType ? (
               <ParentProfile
                 label={"WALI"}

@@ -424,7 +424,14 @@ export function CreateBulkMemberForm({ invitedBy }: { invitedBy: string }) {
             <div className="mt-2 space-y-1">
               {data.map((item, idx) => (
                 <div key={idx} className="text-sm">
-                 <Badge variant={"outline"}>{item.role === "guardian"  ? "Siswa" : item.role === "employee" ?"Pegawai": "Orang Tua"}</Badge> {item.name} 
+                  <Badge variant={"outline"}>
+                    {item.role === "guardian"
+                      ? "Siswa"
+                      : item.role === "employee"
+                        ? "Pegawai"
+                        : "Orang Tua"}
+                  </Badge>{" "}
+                  {item.name}
                 </div>
               ))}
             </div>

@@ -109,9 +109,12 @@ export const CreateStudentSchema = z.object({
 export const EditUserSchema = z
   .object({
     id: z.string(),
-    name: z.string().min(2, {
-      message: "Nama harus diisi minimal 2 karakter.",
-    }),
+    name: z
+      .string()
+      .min(2, {
+        message: "Nama harus diisi minimal 2 karakter.",
+      })
+      .optional(),
     birthPlace: z
       .string()
       .min(1, {
@@ -143,7 +146,8 @@ export const EditUserSchema = z
     country: z.string().optional(),
     address: AddressSchema.optional(),
     domicile: AddressSchema.optional(),
-    domicileSameAsAddress: z.boolean(),
+    domicileSameAsAddress: z.boolean().optional(),
+    image: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -160,9 +164,8 @@ export const EditUserSchema = z
     },
   );
 
-
-  export const createUserFamilyRelationSchema = z.object({
-    userId:z.string(),
-    relatedUserId:z.string(),
-    relationType:z.enum(familyRelationType.enumValues)
-  })
+export const createUserFamilyRelationSchema = z.object({
+  userId: z.string(),
+  relatedUserId: z.string(),
+  relationType: z.enum(familyRelationType.enumValues),
+});

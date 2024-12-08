@@ -27,7 +27,7 @@ import { createInstitution } from "@/server/actions/institutions";
 import { useRouter } from "next/navigation";
 
 export function CreateInstitutionForm({ userId }: { userId: string }) {
-  const router = useRouter()
+  const router = useRouter();
   type FormValues = z.infer<typeof createInstitutionSchema>;
   const defaultValues: Partial<FormValues> = {
     userId,
@@ -45,7 +45,7 @@ export function CreateInstitutionForm({ userId }: { userId: string }) {
   async function onSubmit(data: FormValues) {
     await createInstitution(data);
     toast("Created");
-    router.refresh()
+    router.refresh();
   }
 
   const typeInstituitons = [

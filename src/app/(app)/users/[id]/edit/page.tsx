@@ -20,7 +20,5 @@ export default async function Page({
 
   const data = await getOrgUserProfile(id, orgID);
   if (!data) return notFound();
-  return (
-    <EditUserForm data={data} />
-  );
+  return <EditUserForm data={data} />;
 }

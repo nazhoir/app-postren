@@ -162,7 +162,6 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   savingCashflowCreated: many(savingCashflow),
 }));
 
-
 // Definisi relasi untuk tabel user_family
 export const userFamilyRelations = relations(userFamily, ({ one }) => ({
   user: one(users, {

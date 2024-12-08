@@ -31,7 +31,6 @@ interface ViewOption {
   title: string;
 }
 const viewOptions: ViewOption[] = [
- 
   {
     id: "name",
     title: "Nama",

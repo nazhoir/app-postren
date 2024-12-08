@@ -10,21 +10,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createUserFamilyRelation, searchUserByIdentity } from "@/server/actions/users";
+import {
+  createUserFamilyRelation,
+  searchUserByIdentity,
+} from "@/server/actions/users";
 import { toast } from "sonner";
 import { Icons } from "@/components/icons";
 import { type familyRelationType } from "@/server/db/schema";
 
 // Definisi tipe yang lebih ketat
-type FamilyRelationType = typeof familyRelationType.enumValues[number];
+type FamilyRelationType = (typeof familyRelationType.enumValues)[number];
 
 interface User {
   id: string;
   name: string;
   nik: string;
 }
-
-
 
 export default function UserEditFamilyForm({ userId }: { userId: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,67 +47,73 @@ export default function UserEditFamilyForm({ userId }: { userId: string }) {
     return /^\d{16}$/.test(nikValue);
   };
 
-  const searchUser = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    // Validasi NIK sebelum pencarian
-    if (!validateNik(nik)) {
-      toast.error("NIK harus berupa 16 digit angka");
-      return;
-    }
+  const searchUser = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    setIsLoading(true);
-    try {
-      const req = await searchUserByIdentity(nik.trim());
-
-      if (req) {
-        toast.success("Pengguna ditemukan");
-        setUser({
-          id: req.id,
-          name: req.name,
-          nik,
-        });
-      } else {
-        toast.error("Pengguna tidak ditemukan");
+      // Validasi NIK sebelum pencarian
+      if (!validateNik(nik)) {
+        toast.error("NIK harus berupa 16 digit angka");
+        return;
       }
-    } catch (error) {
-      console.error("Pencarian pengguna gagal:", error);
-      toast.error("Terjadi kesalahan dalam pencarian pengguna");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [nik]);
 
-  const onSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    // Validasi kelengkapan data
-    if (!user || !familyType) {
-      toast.error("Silakan lengkapi data terlebih dahulu");
-      return;
-    }
+      setIsLoading(true);
+      try {
+        const req = await searchUserByIdentity(nik.trim());
 
-    setIsLoading(true);
-    try {
-      await createUserFamilyRelation({
-        userId:user.id,
-        relatedUserId: userId,
-        relationType: familyType,
-      });
-      
-      toast.success(`Berhasil menambah relasi keluarga`);
-      
-      // Reset form setelah berhasil
-      setUser(undefined);
-      setFamilyType(undefined);
-      setNik("");
-    } catch (error) {
-      console.error("Gagal menambah relasi keluarga:", error);
-      toast.error("Gagal menambah relasi keluarga");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, user, familyType]);
+        if (req) {
+          toast.success("Pengguna ditemukan");
+          setUser({
+            id: req.id,
+            name: req.name,
+            nik,
+          });
+        } else {
+          toast.error("Pengguna tidak ditemukan");
+        }
+      } catch (error) {
+        console.error("Pencarian pengguna gagal:", error);
+        toast.error("Terjadi kesalahan dalam pencarian pengguna");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [nik],
+  );
+
+  const onSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      // Validasi kelengkapan data
+      if (!user || !familyType) {
+        toast.error("Silakan lengkapi data terlebih dahulu");
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        await createUserFamilyRelation({
+          userId: user.id,
+          relatedUserId: userId,
+          relationType: familyType,
+        });
+
+        toast.success(`Berhasil menambah relasi keluarga`);
+
+        // Reset form setelah berhasil
+        setUser(undefined);
+        setFamilyType(undefined);
+        setNik("");
+      } catch (error) {
+        console.error("Gagal menambah relasi keluarga:", error);
+        toast.error("Gagal menambah relasi keluarga");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userId, user, familyType],
+  );
 
   return (
     <div>
@@ -115,28 +122,30 @@ export default function UserEditFamilyForm({ userId }: { userId: string }) {
           <div className="grid grid-cols-4 items-end gap-3">
             <div>
               <Label htmlFor="nik">NIK</Label>
-              <Input 
-                id="nik" 
-                name="nik" 
-                defaultValue={user.nik} 
-                disabled 
+              <Input
+                id="nik"
+                name="nik"
+                defaultValue={user.nik}
+                disabled
                 aria-label="NIK Pengguna"
               />
             </div>
             <div>
               <Label htmlFor="name">Nama</Label>
-              <Input 
-                id="name" 
-                name="name" 
-                defaultValue={user.name} 
-                disabled 
+              <Input
+                id="name"
+                name="name"
+                defaultValue={user.name}
+                disabled
                 aria-label="Nama Pengguna"
               />
             </div>
             <div>
               <Label htmlFor="type">Jenis Keluarga</Label>
               <Select
-                onValueChange={(value) => setFamilyType(value as FamilyRelationType)}
+                onValueChange={(value) =>
+                  setFamilyType(value as FamilyRelationType)
+                }
                 value={familyType}
               >
                 <SelectTrigger aria-label="Pilih Jenis Keluarga">
@@ -159,7 +168,7 @@ export default function UserEditFamilyForm({ userId }: { userId: string }) {
             >
               {isLoading ? (
                 <>
-                  <Icons.spinner className="animate-spin mr-2" />
+                  <Icons.spinner className="mr-2 animate-spin" />
                   <span>Mohon tunggu ...</span>
                 </>
               ) : (
@@ -176,7 +185,7 @@ export default function UserEditFamilyForm({ userId }: { userId: string }) {
               <Input
                 id="nik"
                 name="nik"
-                type="text"  // Ubah dari number ke text untuk validasi manual
+                type="text" // Ubah dari number ke text untuk validasi manual
                 placeholder="Masukkan NIK"
                 value={nik}
                 onChange={(e) => setNik(e.target.value)}
@@ -193,7 +202,7 @@ export default function UserEditFamilyForm({ userId }: { userId: string }) {
             >
               {isLoading ? (
                 <>
-                  <Icons.spinner className="animate-spin mr-2" />
+                  <Icons.spinner className="mr-2 animate-spin" />
                   <span>Mohon tunggu ...</span>
                 </>
               ) : (

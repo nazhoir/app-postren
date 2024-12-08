@@ -58,7 +58,6 @@ export function SearchUserSavingAccount() {
         toast.error("Pengguna tidak ditemukan atau belum terdaftar");
       }
     } catch (error) {
-      
       toast.error("Terjadi kesalahan dalam pencarian pengguna");
     } finally {
       setIsLoading(false);

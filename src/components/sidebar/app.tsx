@@ -93,7 +93,6 @@ const navItems = [
         url: "/students",
         icon: GraduationCap,
         items: [
-          
           {
             title: "Mutasi",
             url: "/students/mutation",
@@ -109,7 +108,6 @@ const navItems = [
         url: "/employees",
         icon: BriefcaseBusiness,
         items: [
-          
           {
             title: "Mutasi",
             url: "/gtk/mutation",

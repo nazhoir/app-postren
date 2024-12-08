@@ -188,7 +188,16 @@ export const transactionUserSavingAccount = async (
     };
   }
 
-  const { createdBy, userId, amount, type, name , paymentMethod, paymentNote, note} = validatedFields.data;
+  const {
+    createdBy,
+    userId,
+    amount,
+    type,
+    name,
+    paymentMethod,
+    paymentNote,
+    note,
+  } = validatedFields.data;
 
   try {
     const admin = await db.query.users.findFirst({
@@ -329,7 +338,9 @@ export const transactionUserSavingAccount = async (
           amount,
           type,
           name,
-          paymentMethod, paymentNote, note
+          paymentMethod,
+          paymentNote,
+          note,
         })
         .returning({
           id: savingCashflow.id,

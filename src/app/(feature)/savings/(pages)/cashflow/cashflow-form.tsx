@@ -52,9 +52,9 @@ export function SavingCashflowForm({
     amount: "",
     type, // Changed to debit for withdrawal
     name,
-    paymentMethod:"cash",
-    note:"",
-    paymentNote:""
+    paymentMethod: "cash",
+    note: "",
+    paymentNote: "",
   };
 
   const form = useForm<FormValues>({

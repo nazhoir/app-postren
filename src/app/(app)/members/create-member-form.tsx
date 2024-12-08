@@ -31,8 +31,7 @@ import { useRouter } from "next/navigation";
 type FormValues = z.infer<typeof CreateMemberSchema>;
 
 export function CreateMemberForm({ userId }: { userId: string }) {
-
-  const router = useRouter()
+  const router = useRouter();
   const defaultValues: Partial<FormValues> = {
     name: "",
     birthPlace: "",
@@ -63,7 +62,7 @@ export function CreateMemberForm({ userId }: { userId: string }) {
   async function onSubmit(data: FormValues) {
     await createMemberAction(data);
     toast("Created");
-    router.refresh()
+    router.refresh();
   }
 
   return (

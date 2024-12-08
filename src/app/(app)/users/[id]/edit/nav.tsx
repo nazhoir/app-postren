@@ -18,9 +18,9 @@ export default function NavEdit({ userId }: { userId: string }) {
       href: "/edit/family",
     },
     {
-        name: "Riwayat Pendidikan",
-        href: "/edit/education",
-      },
+      name: "Riwayat Pendidikan",
+      href: "/edit/education",
+    },
   ];
   return (
     <div className="mb-4 flex space-x-2 border-b p-4">
