@@ -98,7 +98,7 @@ const MainContent = ({ data, orgID }: { data: UserProfile; orgID: string }) => (
     <div className="pt-6 lg:w-full">
       <div className="md:grid md:grid-cols-7">
         <Avatar className="mx-auto h-32 w-32 rounded-lg border md:sticky md:top-8">
-          <AvatarImage src={data.image!} alt={data.name} />
+          <AvatarImage src={data.image!} alt={data.name} className="object-cover"/>
           <AvatarFallback className="rounded-lg">
             {`${data.name?.split(" ")[0]?.slice(0, 1)}${data.name?.split(" ")[1]?.slice(0, 1)}`.toUpperCase()}
           </AvatarFallback>
