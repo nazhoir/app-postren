@@ -19,6 +19,7 @@ import { employees } from "../organization/employees";
 import { addresses } from "../address/address";
 import { userBill, userBillPayments } from "../finance/billings";
 import { savingCashflow, savings } from "../saving/saving";
+import { educationHistories } from "../academic/education";
 
 export const users = createTable(
   "user",
@@ -160,6 +161,10 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   }),
 
   savingCashflowCreated: many(savingCashflow),
+
+  // Education History
+  educationHistories:many(educationHistories),
+  createdEducationHistories:many(educationHistories),
 }));
 
 // Definisi relasi untuk tabel user_family

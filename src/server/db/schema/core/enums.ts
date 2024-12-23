@@ -24,3 +24,44 @@ export const billingItemStatus = pgEnum("billing_item_status", [
   "active",
   "inactive",
 ]);
+
+
+export const educationTypes = pgEnum("education_types", [
+  "FORMAL",
+  "NON_FORMAL"
+]);
+
+// Enum untuk level pendidikan formal
+export const formalEducationLevels = pgEnum("formal_edu_levels", [
+  "SD/Sederajat",
+  "SMP/Sederajat", 
+  "SMA/Sederajat",
+  "D1",
+  "D2", 
+  "D3",
+  "D4/S1",
+  "S2",
+  "S3"
+]);
+
+export const educationDegreePositions = pgEnum("edu_dgr_positions",[
+  "Depan",
+  "Belakang"
+])
+
+// Enum untuk jenis institusi pendidikan formal
+export const schoolTypes = pgEnum("school_type", [
+  "SWASTA",
+  "NEGERI"
+]);
+
+// Enum untuk jenis pelatihan/kursus
+export const trainingTypes = pgEnum("training_types", [
+  "WORKSHOP",
+  "SEMINAR", 
+  "PELATIHAN",
+  "SERTIFIKASI",
+  "KONFERENSI",
+  "ONLINE_COURSE",
+  "LAINNYA"
+]);

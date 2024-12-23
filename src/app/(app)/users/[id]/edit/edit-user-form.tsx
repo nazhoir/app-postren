@@ -30,6 +30,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import isEqual from "lodash/isEqual";
 import cloneDeep from "lodash/cloneDeep";
 import { EditUserPicture } from "./edit-user-picture";
+
 type FormValues = z.infer<typeof EditUserSchema>;
 
 interface EditUserFormProps {

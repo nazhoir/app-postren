@@ -1,3 +1,4 @@
+export * from "./academic/education"
 export * from "./address/address";
 export * from "./core/base";
 export * from "./core/enums";
